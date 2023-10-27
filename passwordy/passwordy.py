@@ -154,28 +154,21 @@ class HexKey(Key):
 class PasswordKey(Key):
     """Define passwords as key."""
 
-    def _select_symbols(self: "PasswordKey") -> str:
-        """Select the sysmbols to be used for the password generation."""
-        selected_symbols: str = ""
-        if args.password_lower_ascii:
-            selected_symbols += string.ascii_lowercase
-        if args.password_upper_ascii:
-            selected_symbols += string.ascii_uppercase
-        if args.password_digits:
-            selected_symbols += string.digits
-        if args.password_special_characters1:
-            symbols: str = ".:,;+-=*#_<>()[]§~"
-            selected_symbols += symbols
-        if args.password_special_characters2:
-            symbols: str = "!?$&"
-            selected_symbols += symbols
-        return selected_symbols
+    def _generate_hashes(self: "PasswordKey") -> None:
+        """Provide all kind of hashes for the password."""
+        self.key_md5 = hashlib.md5(self.key.encode()).hexdigest()  # noqa: S324
+        self.key_sha1 = hashlib.sha1(self.key.encode()).hexdigest()  # noqa: S324
+        self.key_sha224 = hashlib.sha224(self.key.encode()).hexdigest()
+        self.key_sha256 = hashlib.sha256(self.key.encode()).hexdigest()
+        self.key_sha384 = hashlib.sha384(self.key.encode()).hexdigest()
+        self.key_sha512 = hashlib.sha512(self.key.encode()).hexdigest()
+        self.key_sha3_224 = hashlib.sha3_224(self.key.encode()).hexdigest()
+        self.key_sha3_256 = hashlib.sha3_256(self.key.encode()).hexdigest()
+        self.key_sha3_384 = hashlib.sha3_384(self.key.encode()).hexdigest()
+        self.key_sha3_512 = hashlib.sha3_512(self.key.encode()).hexdigest()
 
-    def __init__(self: "PasswordKey", length: int) -> None:
-        """Initialize PasswordKey."""
-        self.key_size_length: int = length
-        selected_symbols: str = self._select_symbols()
-        # Generate a good password with at least 1 symbol out of each symbol group
+    def _generate_password(self: "PasswordKey", selected_symbols: str) -> None:
+        """Generate a good password with at least 1 symbol out of each symbol group."""
         while True:
             self.key: str = "".join(secrets.choice(selected_symbols) for i in range(self.key_size_length))
             if args.password_lower_ascii and not any(symbol.islower() for symbol in self.key):
@@ -197,19 +190,31 @@ class PasswordKey(Key):
             ):
                 continue
             # From here on the password is good
-            # Provide all
-            self.key_md5 = hashlib.md5(self.key.encode()).hexdigest()  # noqa: S324
-            self.key_sha1 = hashlib.sha1(self.key.encode()).hexdigest()  # noqa: S324
-            self.key_sha224 = hashlib.sha224(self.key.encode()).hexdigest()
-            self.key_sha256 = hashlib.sha256(self.key.encode()).hexdigest()
-            self.key_sha384 = hashlib.sha384(self.key.encode()).hexdigest()
-            self.key_sha512 = hashlib.sha512(self.key.encode()).hexdigest()
-            self.key_sha3_224 = hashlib.sha3_224(self.key.encode()).hexdigest()
-            self.key_sha3_256 = hashlib.sha3_256(self.key.encode()).hexdigest()
-            self.key_sha3_384 = hashlib.sha3_384(self.key.encode()).hexdigest()
-            self.key_sha3_512 = hashlib.sha3_512(self.key.encode()).hexdigest()
-
             break
+
+    def _select_symbols(self: "PasswordKey") -> str:
+        """Select the sysmbols to be used for the password generation."""
+        selected_symbols: str = ""
+        if args.password_lower_ascii:
+            selected_symbols += string.ascii_lowercase
+        if args.password_upper_ascii:
+            selected_symbols += string.ascii_uppercase
+        if args.password_digits:
+            selected_symbols += string.digits
+        if args.password_special_characters1:
+            symbols: str = ".:,;+-=*#_<>()[]§~"
+            selected_symbols += symbols
+        if args.password_special_characters2:
+            symbols: str = "!?$&"
+            selected_symbols += symbols
+        return selected_symbols
+
+    def __init__(self: "PasswordKey", length: int) -> None:
+        """Initialize PasswordKey."""
+        self.key_size_length: int = length
+        selected_symbols: str = self._select_symbols()
+        self._generate_password(selected_symbols)
+        self._generate_hashes()
 
     def __str__(self: "PasswordKey") -> str:
         """Return PasswordKey as str."""
