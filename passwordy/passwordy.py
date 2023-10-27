@@ -148,7 +148,7 @@ class HexKey(Key):
 
     def verbose(self: "HexKey") -> None:
         """Return Key as str with verbose information."""
-        return f"{self.hex_key_size_byte} Byte, {self.key_size_symbols} symbols, {self.key_size_bit} bit: {self.key}"
+        return f"HEX key {self.hex_key_size_byte} Byte, {self.key_size_symbols} symbols, {self.key_size_bit} bit: {self.key}"
 
 
 class PasswordKey(Key):
@@ -222,7 +222,7 @@ class PasswordKey(Key):
     def verbose(self: "PasswordKey") -> None:
         """Return Key as str with verbose information."""
         return (
-            f"{self.key_size_length} characters: {self.key}\n"
+            f"Password {self.key_size_length} characters: {self.key}\n"
             f"MD5: {self.key_md5}\n"
             f"SHA1: {self.key_sha1}\n"
             f"SHA224: {self.key_sha224}\n"
