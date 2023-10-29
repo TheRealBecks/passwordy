@@ -148,7 +148,12 @@ class HexKey(Key):
 
     def verbose(self: "HexKey") -> None:
         """Return Key as str with verbose information."""
-        return f"HEX key {self.hex_key_size_byte} Byte, {self.key_size_symbols} symbols, {self.key_size_bit} bit: {self.key}"
+        return (
+            f"HEX key {self.hex_key_size_byte} Byte,"
+            f" {self.key_size_symbols} symbols,"
+            f" {self.key_size_bit} bit:"
+            f" {self.key}"
+        )
 
 
 class PasswordKey(Key):
@@ -265,22 +270,22 @@ class KeyRing:
 
     def json(self: "KeyRing") -> dict:
         """Return keys as JSON."""
-        return print(json.dumps(self.keys, default=lambda __o: __o.__dict__))
+        return print(json.dumps(self.keys, default=lambda __o: __o.__dict__))  # noqa: T201
 
     def print_brief(self: "KeyRing") -> None:
         """Print Keys to CLI without additional information."""
         for key_name in self.keys:
             for key in self.keys[key_name]:
-                print(key.brief())
+                print(key.brief())  # noqa: T201
 
     def print_verbose(self: "KeyRing") -> None:
         """Print Keys to CLI with verbose information."""
         for key_name in self.keys:
             if key_name in KEY_DESCRIPTIONS:
-                print(KEY_DESCRIPTIONS[key_name])
+                print(KEY_DESCRIPTIONS[key_name])  # noqa: T201
             for key in self.keys[key_name]:
-                print(key.verbose())
-            print()
+                print(key.verbose())  # noqa: T201
+            print()  # noqa: T201
 
 
 def example_key_ring(key_ring: KeyRing) -> KeyRing:
@@ -308,7 +313,7 @@ def example_key_ring(key_ring: KeyRing) -> KeyRing:
 
 if __name__ == "__main__":
     if sys.version_info < (3, 9):  # noqa: UP036
-        print("Python 3.9 or higher is required.")
+        print("Python 3.9 or higher is required.")  # noqa: T201
         sys.exit(1)
 
     args: argparse.ArgumentParser = parse_arguments()
