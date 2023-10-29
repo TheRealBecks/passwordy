@@ -10,8 +10,11 @@ from abc import ABC, abstractmethod
 from functools import reduce
 from typing import ClassVar
 
+PASSWORD_SPECIAL_CHARACTERS1: str = ".:,;+-=*#_<>()[]§~"
+PASSWORD_SPECIAL_CHARACTERS2: str = "!?$&"
+
 # Passwords with a length of 32 characters or less should not contain duplicate symbols in a row
-# 'no character pair with two equal symbols'
+# Let's say 'no character pair with two equal symbols'
 PASSWORD_LENGTH_WITHOUT_REPETITION: int = 32
 
 # Key descriptions
@@ -99,14 +102,14 @@ def parse_arguments() -> argparse.ArgumentParser:
         action=argparse.BooleanOptionalAction,
         default=False,
         type=bool,
-        help="Use special characters for password generation including .:,;+-=*#_<>()[]§~",
+        help=f"Use special characters for password generation including {PASSWORD_SPECIAL_CHARACTERS1}",
     )
     args.add_argument(
         "--password_special_characters2",
         action=argparse.BooleanOptionalAction,
         default=False,
         type=bool,
-        help="Use special characters for password generation including !?$&",
+        help=f"Use special characters for password generation including {PASSWORD_SPECIAL_CHARACTERS2}",
     )
 
     return args.parse_args()
@@ -159,67 +162,94 @@ class HexKey(Key):
 class PasswordKey(Key):
     """Define passwords as key."""
 
-    def _generate_hashes(self: "PasswordKey") -> None:
-        """Provide all kind of hashes for the password."""
-        self.key_md5 = hashlib.md5(self.key.encode()).hexdigest()  # noqa: S324
-        self.key_sha1 = hashlib.sha1(self.key.encode()).hexdigest()  # noqa: S324
-        self.key_sha224 = hashlib.sha224(self.key.encode()).hexdigest()
-        self.key_sha256 = hashlib.sha256(self.key.encode()).hexdigest()
-        self.key_sha384 = hashlib.sha384(self.key.encode()).hexdigest()
-        self.key_sha512 = hashlib.sha512(self.key.encode()).hexdigest()
-        self.key_sha3_224 = hashlib.sha3_224(self.key.encode()).hexdigest()
-        self.key_sha3_256 = hashlib.sha3_256(self.key.encode()).hexdigest()
-        self.key_sha3_384 = hashlib.sha3_384(self.key.encode()).hexdigest()
-        self.key_sha3_512 = hashlib.sha3_512(self.key.encode()).hexdigest()
+    @staticmethod
+    def _password_strength(
+        *,
+        password_lower_ascii: bool = False,
+        password_upper_ascii: bool = False,
+        password_digits: bool = False,
+        password_special_characters1: bool = False,
+        password_special_characters2: bool = False,
+    ) -> dict:
+        """Define the password strength by defining the to be used symbols."""
+        password_strength: dict = {}
+        password_strength["password_lower_ascii"] = bool(password_lower_ascii)
+        password_strength["password_upper_ascii"] = bool(password_upper_ascii)
+        password_strength["password_digits"] = bool(password_digits)
+        password_strength["password_special_characters1"] = bool(password_special_characters1)
+        password_strength["password_special_characters2"] = bool(password_special_characters2)
+        return password_strength
 
-    def _generate_password(self: "PasswordKey", selected_symbols: str) -> None:
-        """Generate a good password with at least 1 symbol out of each symbol group."""
+    def _select_symbols(self: "PasswordKey", password_strength: dict) -> str:
+        """Select the sysmbols to be used for the password generation."""
+        selected_symbols: str = ""
+        if password_strength["password_lower_ascii"]:
+            selected_symbols += string.ascii_lowercase
+        if password_strength["password_upper_ascii"]:
+            selected_symbols += string.ascii_uppercase
+        if password_strength["password_digits"]:
+            selected_symbols += string.digits
+        if password_strength["password_special_characters1"]:
+            selected_symbols += PASSWORD_SPECIAL_CHARACTERS1
+        if password_strength["password_special_characters2"]:
+            selected_symbols += PASSWORD_SPECIAL_CHARACTERS2
+        return selected_symbols
+
+    def _generate_password(self: "PasswordKey", key_size_length: int, password_strength: dict) -> None:
+        """Generate a good password with at least 1 symbol out of each defined symbol group."""
+        selected_symbols: str = self._select_symbols(password_strength)
         while True:
-            self.key: str = "".join(secrets.choice(selected_symbols) for i in range(self.key_size_length))
-            if args.password_lower_ascii and not any(symbol.islower() for symbol in self.key):
+            self.key: str = "".join(secrets.choice(selected_symbols) for i in range(key_size_length))
+            if password_strength["password_lower_ascii"] and not any(symbol.islower() for symbol in self.key):
                 continue
-            if args.password_upper_ascii and not any(symbol.isupper() for symbol in self.key):
+            if password_strength["password_upper_ascii"] and not any(symbol.isupper() for symbol in self.key):
                 continue
-            if args.password_digits and not any(symbol.isdigit() for symbol in self.key):
+            if password_strength["password_digits"] and not any(symbol.isdigit() for symbol in self.key):
                 continue
-            if args.password_special_characters1 and not any(symbol in selected_symbols for symbol in self.key):
+            if password_strength["password_special_characters1"] and not any(
+                symbol in PASSWORD_SPECIAL_CHARACTERS1 for symbol in self.key
+            ):
                 continue
-            if args.password_special_characters2 and not any(symbol in selected_symbols for symbol in self.key):
+            if password_strength["password_special_characters2"] and not any(
+                symbol in PASSWORD_SPECIAL_CHARACTERS2 for symbol in self.key
+            ):
                 continue
             # Passwords for e.g. BGP should not start with a digit
             if self.key[0].isdigit():
                 continue
             # Check for duplicate symbols in a row ('no character pair with two equal symbols')
-            if self.key_size_length <= PASSWORD_LENGTH_WITHOUT_REPETITION and bool(
+            if key_size_length <= PASSWORD_LENGTH_WITHOUT_REPETITION and not bool(
                 reduce(lambda x, y: (x is not y) and x and y, self.key)
             ):
                 continue
             # From here on the password is good
             break
 
-    def _select_symbols(self: "PasswordKey") -> str:
-        """Select the sysmbols to be used for the password generation."""
-        selected_symbols: str = ""
-        if args.password_lower_ascii:
-            selected_symbols += string.ascii_lowercase
-        if args.password_upper_ascii:
-            selected_symbols += string.ascii_uppercase
-        if args.password_digits:
-            selected_symbols += string.digits
-        if args.password_special_characters1:
-            symbols: str = ".:,;+-=*#_<>()[]§~"
-            selected_symbols += symbols
-        if args.password_special_characters2:
-            symbols: str = "!?$&"
-            selected_symbols += symbols
-        return selected_symbols
+    def _generate_unsalted_hashes(self: "PasswordKey") -> None:
+        """Provide all kind of unsalted hashes for the password."""
+        self.key_md5 = hashlib.md5(self.key.encode(encoding="UTF-8")).hexdigest()  # noqa: S324
+        self.key_sha1 = hashlib.sha1(self.key.encode(encoding="UTF-8")).hexdigest()  # noqa: S324
+        self.key_sha224 = hashlib.sha224(self.key.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha256 = hashlib.sha256(self.key.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha384 = hashlib.sha384(self.key.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha512 = hashlib.sha512(self.key.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha3_224 = hashlib.sha3_224(self.key.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha3_256 = hashlib.sha3_256(self.key.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha3_384 = hashlib.sha3_384(self.key.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha3_512 = hashlib.sha3_512(self.key.encode(encoding="UTF-8")).hexdigest()
 
     def __init__(self: "PasswordKey", length: int) -> None:
         """Initialize PasswordKey."""
         self.key_size_length: int = length
-        selected_symbols: str = self._select_symbols()
-        self._generate_password(selected_symbols)
-        self._generate_hashes()
+        password_strength = self._password_strength(
+            password_lower_ascii=args.password_lower_ascii,
+            password_upper_ascii=args.password_upper_ascii,
+            password_digits=args.password_digits,
+            password_special_characters1=args.password_special_characters1,
+            password_special_characters2=args.password_special_characters2,
+        )
+        self._generate_password(key_size_length=self.key_size_length, password_strength=password_strength)
+        self._generate_unsalted_hashes()
 
     def __str__(self: "PasswordKey") -> str:
         """Return PasswordKey as str."""
