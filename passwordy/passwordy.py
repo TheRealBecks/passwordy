@@ -5,6 +5,7 @@ import hashlib
 import json
 import secrets
 import string
+import subprocess
 import sys
 from abc import ABC, abstractmethod
 from functools import reduce
@@ -16,6 +17,10 @@ PASSWORD_SPECIAL_CHARACTERS2: str = "!?$&"
 # Passwords with a length of 32 characters or less should not contain duplicate symbols in a row
 # Let's say 'no character pair with two equal symbols'
 PASSWORD_LENGTH_WITHOUT_REPETITION: int = 32
+
+# Sane defaults for salt keys were applicable
+SALT_LENGTH: int = 16
+SALT_ADDITIONAL_CHARACTERS: str = "./"
 
 # Key descriptions
 KEY_DESCRIPTIONS = {
@@ -162,68 +167,90 @@ class HexKey(Key):
 class PasswordKey(Key):
     """Define passwords as key."""
 
-    @staticmethod
-    def _password_strength(
+    def _password_strength(  # noqa: PLR0913
+        self: "PasswordKey",
         *,
-        password_lower_ascii: bool = False,
-        password_upper_ascii: bool = False,
-        password_digits: bool = False,
-        password_special_characters1: bool = False,
-        password_special_characters2: bool = False,
+        lower_ascii: bool = False,
+        upper_ascii: bool = False,
+        digits: bool = False,
+        special_characters1: bool = False,
+        special_characters2: bool = False,
+        additional_characters: str = "",
     ) -> dict:
-        """Define the password strength by defining the to be used symbols."""
+        """Define the password strength to be used for the password generation."""
         password_strength: dict = {}
-        password_strength["password_lower_ascii"] = bool(password_lower_ascii)
-        password_strength["password_upper_ascii"] = bool(password_upper_ascii)
-        password_strength["password_digits"] = bool(password_digits)
-        password_strength["password_special_characters1"] = bool(password_special_characters1)
-        password_strength["password_special_characters2"] = bool(password_special_characters2)
+        password_strength["lower_ascii"] = lower_ascii
+        password_strength["upper_ascii"] = upper_ascii
+        password_strength["digits"] = digits
+        password_strength["special_characters1"] = special_characters1
+        password_strength["special_characters2"] = special_characters2
+        password_strength["additional_characters"] = bool(additional_characters)
+
+        selected_symbols: str = ""
+        if lower_ascii:
+            selected_symbols += string.ascii_lowercase
+        if upper_ascii:
+            selected_symbols += string.ascii_uppercase
+        if digits:
+            selected_symbols += string.digits
+        if special_characters1:
+            selected_symbols += PASSWORD_SPECIAL_CHARACTERS1
+        if special_characters2:
+            selected_symbols += PASSWORD_SPECIAL_CHARACTERS2
+        if additional_characters != "":
+            selected_symbols += additional_characters
+        password_strength["selected_symbols"] = selected_symbols
+
         return password_strength
 
-    def _select_symbols(self: "PasswordKey", password_strength: dict) -> str:
-        """Select the sysmbols to be used for the password generation."""
-        selected_symbols: str = ""
-        if password_strength["password_lower_ascii"]:
-            selected_symbols += string.ascii_lowercase
-        if password_strength["password_upper_ascii"]:
-            selected_symbols += string.ascii_uppercase
-        if password_strength["password_digits"]:
-            selected_symbols += string.digits
-        if password_strength["password_special_characters1"]:
-            selected_symbols += PASSWORD_SPECIAL_CHARACTERS1
-        if password_strength["password_special_characters2"]:
-            selected_symbols += PASSWORD_SPECIAL_CHARACTERS2
-        return selected_symbols
-
-    def _generate_password(self: "PasswordKey", key_size_length: int, password_strength: dict) -> None:
-        """Generate a good password with at least 1 symbol out of each defined symbol group."""
-        selected_symbols: str = self._select_symbols(password_strength)
+    def _generate_password(
+        self: "PasswordKey",
+        *,
+        key_size_length: int,
+        password_strength: dict,
+        check_password_strength: bool = True,
+        check_starting_with_digit: bool = True,
+    ) -> str:
+        """Generate a good password with optionally at least 1 symbol out of each defined symbol group."""
         while True:
-            self.key: str = "".join(secrets.choice(selected_symbols) for i in range(key_size_length))
-            if password_strength["password_lower_ascii"] and not any(symbol.islower() for symbol in self.key):
-                continue
-            if password_strength["password_upper_ascii"] and not any(symbol.isupper() for symbol in self.key):
-                continue
-            if password_strength["password_digits"] and not any(symbol.isdigit() for symbol in self.key):
-                continue
-            if password_strength["password_special_characters1"] and not any(
-                symbol in PASSWORD_SPECIAL_CHARACTERS1 for symbol in self.key
+            key: str = "".join(secrets.choice(password_strength["selected_symbols"]) for _ in range(key_size_length))
+            if (
+                check_password_strength
+                and password_strength["lower_ascii"]
+                and not any(symbol.islower() for symbol in key)
             ):
                 continue
-            if password_strength["password_special_characters2"] and not any(
-                symbol in PASSWORD_SPECIAL_CHARACTERS2 for symbol in self.key
+            if (
+                check_password_strength
+                and password_strength["upper_ascii"]
+                and not any(symbol.isupper() for symbol in key)
+            ):
+                continue
+            if check_password_strength and password_strength["digits"] and not any(symbol.isdigit() for symbol in key):
+                continue
+            if (
+                check_password_strength
+                and password_strength["special_characters1"]
+                and not any(symbol in PASSWORD_SPECIAL_CHARACTERS1 for symbol in key)
+            ):
+                continue
+            if (
+                check_password_strength
+                and password_strength["special_characters2"]
+                and not any(symbol in PASSWORD_SPECIAL_CHARACTERS2 for symbol in key)
             ):
                 continue
             # Passwords for e.g. BGP should not start with a digit
-            if self.key[0].isdigit():
+            if check_starting_with_digit and key[0].isdigit():
                 continue
             # Check for duplicate symbols in a row ('no character pair with two equal symbols')
             if key_size_length <= PASSWORD_LENGTH_WITHOUT_REPETITION and not bool(
-                reduce(lambda x, y: (x is not y) and x and y, self.key)
+                reduce(lambda x, y: (x is not y) and x and y, key)
             ):
                 continue
-            # From here on the password is good
+            # From here on the key is good
             break
+        return key
 
     def _generate_unsalted_hashes(self: "PasswordKey") -> None:
         """Provide all kind of unsalted hashes for the password."""
@@ -238,18 +265,81 @@ class PasswordKey(Key):
         self.key_sha3_384 = hashlib.sha3_384(self.key.encode(encoding="UTF-8")).hexdigest()
         self.key_sha3_512 = hashlib.sha3_512(self.key.encode(encoding="UTF-8")).hexdigest()
 
+    def _run_openssl(self: "PasswordKey", salt: str, hash_type: str) -> subprocess.CompletedProcess:
+        """Run openssl to generate service keys."""
+        hash_types: dict = {}
+        hash_types["apr1"] = "apr1"
+        hash_types["md5"] = "1"
+        hash_types["sha256"] = "5"
+        hash_types["sha512"] = "6"
+        return subprocess.run(
+            ["openssl", "passwd", f"-{hash_types[hash_type]}", "-salt", salt, self.key],  # noqa: S603, S607
+            capture_output=True,
+            check=True,
+        )
+
+    def _generate_salted_hash(self: "PasswordKey", hash_type: str) -> str:
+        """Generate a salted hash."""
+        hash_types: dict = {
+            "apr1": {
+                "openssl_type": "apr1",
+                "salt_length": 8,
+                "salt_additional_characters": "",
+            },
+            "md5": {
+                "openssl_type": "md5",
+                "salt_length": 8,
+                "salt_additional_characters": "",
+            },
+            "sha256": {
+                "openssl_type": "5",
+                "salt_length": SALT_LENGTH,
+                "salt_additional_characters": SALT_ADDITIONAL_CHARACTERS,
+            },
+            "sha512": {
+                "openssl_type": "6",
+                "salt_length": SALT_LENGTH,
+                "salt_additional_characters": SALT_ADDITIONAL_CHARACTERS,
+            },
+        }
+
+        salt_strength = self._password_strength(
+            lower_ascii=True,
+            upper_ascii=True,
+            digits=True,
+            special_characters1=False,
+            special_characters2=False,
+            additional_characters=hash_types[hash_type]["salt_additional_characters"],
+        )
+        salt = self._generate_password(
+            key_size_length=hash_types[hash_type]["salt_length"],
+            password_strength=salt_strength,
+            check_password_strength=False,
+            check_starting_with_digit=False,
+        )
+        openssl_result = self._run_openssl(salt=salt, hash_type=hash_type)
+        return openssl_result.stdout.decode("utf-8").strip() if openssl_result.returncode == 0 else ""
+
+    def _generate_salted_hashes(self: "PasswordKey") -> None:
+        """Provide all kind of salted hashes for the password."""
+        self.key_md5_salted = self._generate_salted_hash(hash_type="md5")
+        self.key_sha256_salted = self._generate_salted_hash(hash_type="sha256")
+        self.key_sha512_salted = self._generate_salted_hash(hash_type="sha512")
+        self.key_apr1_salted = self._generate_salted_hash(hash_type="apr1")
+
     def __init__(self: "PasswordKey", length: int) -> None:
         """Initialize PasswordKey."""
         self.key_size_length: int = length
         password_strength = self._password_strength(
-            password_lower_ascii=args.password_lower_ascii,
-            password_upper_ascii=args.password_upper_ascii,
-            password_digits=args.password_digits,
-            password_special_characters1=args.password_special_characters1,
-            password_special_characters2=args.password_special_characters2,
+            lower_ascii=args.password_lower_ascii,
+            upper_ascii=args.password_upper_ascii,
+            digits=args.password_digits,
+            special_characters1=args.password_special_characters1,
+            special_characters2=args.password_special_characters2,
         )
-        self._generate_password(key_size_length=self.key_size_length, password_strength=password_strength)
+        self.key = self._generate_password(key_size_length=self.key_size_length, password_strength=password_strength)
         self._generate_unsalted_hashes()
+        self._generate_salted_hashes()
 
     def __str__(self: "PasswordKey") -> str:
         """Return PasswordKey as str."""
@@ -262,17 +352,21 @@ class PasswordKey(Key):
     def verbose(self: "PasswordKey") -> None:
         """Return Key as str with verbose information."""
         return (
-            f"Password {self.key_size_length} characters: {self.key}\n"
-            f"MD5: {self.key_md5}\n"
-            f"SHA1: {self.key_sha1}\n"
-            f"SHA224: {self.key_sha224}\n"
-            f"SHA256: {self.key_sha256}\n"
-            f"SHA384: {self.key_sha384}\n"
-            f"SHA512: {self.key_sha512}\n"
-            f"SHA3_224: {self.key_sha3_224}\n"
-            f"SHA3_256: {self.key_sha3_256}\n"
-            f"SHA3_384: {self.key_sha3_384}\n"
-            f"SHA3_512: {self.key_sha3_512}\n"
+            f"key (plaintext password) with {self.key_size_length} characters: {self.key}\n"
+            f"key_md5: {self.key_md5}\n"
+            f"key_sha1: {self.key_sha1}\n"
+            f"key_sha224: {self.key_sha224}\n"
+            f"key_sha256: {self.key_sha256}\n"
+            f"key_sha384: {self.key_sha384}\n"
+            f"key_sha512: {self.key_sha512}\n"
+            f"key_sha3_224: {self.key_sha3_224}\n"
+            f"key_sha3_256: {self.key_sha3_256}\n"
+            f"key_sha3_384: {self.key_sha3_384}\n"
+            f"key_sha3_512: {self.key_sha3_512}\n"
+            f"key_md5_salted (e.g. Cisco NX-OS): {self.key_md5_salted}\n"
+            f"key_sha256_salted (e.g. Cisco NX-OS): {self.key_sha256_salted}\n"
+            f"key_sha512_salted (e.g. Linux-based systems): {self.key_sha512_salted}\n"
+            f"key_apr1_salted (e.g. Linux-based systems): {self.key_apr1_salted}\n"
         )
 
 
