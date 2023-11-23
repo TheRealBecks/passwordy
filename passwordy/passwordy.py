@@ -365,8 +365,8 @@ class PasswordKey(Key):
             f"key_sha3_512: {self.key_sha3_512}\n"
             f"key_md5_salted (e.g. Cisco NX-OS): {self.key_md5_salted}\n"
             f"key_sha256_salted (e.g. Cisco NX-OS): {self.key_sha256_salted}\n"
-            f"key_sha512_salted (e.g. Linux-based systems): {self.key_sha512_salted}\n"
-            f"key_apr1_salted (e.g. Linux-based systems): {self.key_apr1_salted}\n"
+            f"key_sha512_salted (e.g. Linux-based systems, Arista EOS, Juniper Junos): {self.key_sha512_salted}\n"
+            f"key_apr1_salted (e.g. Apache HTTP Server htaccess): {self.key_apr1_salted}\n"
         )
 
 
