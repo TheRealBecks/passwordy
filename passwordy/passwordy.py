@@ -265,15 +265,10 @@ class PasswordKey(Key):
         self.key_sha3_384 = hashlib.sha3_384(self.key.encode(encoding="UTF-8")).hexdigest()
         self.key_sha3_512 = hashlib.sha3_512(self.key.encode(encoding="UTF-8")).hexdigest()
 
-    def _run_openssl(self: "PasswordKey", salt: str, hash_type: str) -> subprocess.CompletedProcess:
+    def _run_openssl(self: "PasswordKey", salt: str, openssl_type: str) -> subprocess.CompletedProcess:
         """Run openssl to generate service keys."""
-        hash_types: dict = {}
-        hash_types["apr1"] = "apr1"
-        hash_types["md5"] = "1"
-        hash_types["sha256"] = "5"
-        hash_types["sha512"] = "6"
         return subprocess.run(
-            ["openssl", "passwd", f"-{hash_types[hash_type]}", "-salt", salt, self.key],  # noqa: S603, S607
+            ["openssl", "passwd", f"-{openssl_type}", "-salt", salt, self.key],  # noqa: S603, S607
             capture_output=True,
             check=True,
         )
@@ -287,8 +282,13 @@ class PasswordKey(Key):
                 "salt_additional_characters": "",
             },
             "md5": {
-                "openssl_type": "md5",
+                "openssl_type": "1",
                 "salt_length": 8,
+                "salt_additional_characters": "",
+            },
+            "md5_cisco_ios": {
+                "openssl_type": "1",
+                "salt_length": 4,
                 "salt_additional_characters": "",
             },
             "sha256": {
@@ -317,12 +317,13 @@ class PasswordKey(Key):
             check_password_strength=False,
             check_starting_with_digit=False,
         )
-        openssl_result = self._run_openssl(salt=salt, hash_type=hash_type)
+        openssl_result = self._run_openssl(salt=salt, openssl_type=hash_types[hash_type]["openssl_type"])
         return openssl_result.stdout.decode("utf-8").strip() if openssl_result.returncode == 0 else ""
 
     def _generate_salted_hashes(self: "PasswordKey") -> None:
         """Provide all kind of salted hashes for the password."""
         self.key_md5_salted = self._generate_salted_hash(hash_type="md5")
+        self.key_md5_salted_cisco_ios = self._generate_salted_hash(hash_type="md5_cisco_ios")
         self.key_sha256_salted = self._generate_salted_hash(hash_type="sha256")
         self.key_sha512_salted = self._generate_salted_hash(hash_type="sha512")
         self.key_apr1_salted = self._generate_salted_hash(hash_type="apr1")
@@ -363,7 +364,8 @@ class PasswordKey(Key):
             f"key_sha3_256: {self.key_sha3_256}\n"
             f"key_sha3_384: {self.key_sha3_384}\n"
             f"key_sha3_512: {self.key_sha3_512}\n"
-            f"key_md5_salted (e.g. Cisco NX-OS): {self.key_md5_salted}\n"
+            f"key_md5_salted: {self.key_md5_salted}\n"
+            f"key_md5_salted_cisco_ios (e.g. Cisco IOS): {self.key_md5_salted_cisco_ios}\n"
             f"key_sha256_salted (e.g. Cisco NX-OS): {self.key_sha256_salted}\n"
             f"key_sha512_salted (e.g. Linux-based systems, Arista EOS, Juniper Junos): {self.key_sha512_salted}\n"
             f"key_apr1_salted (e.g. Apache HTTP Server htaccess): {self.key_apr1_salted}\n"
