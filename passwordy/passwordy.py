@@ -132,6 +132,10 @@ class Key(ABC):
         """Return Key as str."""
 
     @abstractmethod
+    def brief(self: "Key") -> str:
+        """Return Key as str."""
+
+    @abstractmethod
     def verbose(self: "Key") -> None:
         """Return Key as str with verbose information."""
 
@@ -151,11 +155,11 @@ class HexKey(Key):
         return f"{self.key}"
 
     def brief(self: "HexKey") -> str:
-        """Return Key as str."""
+        """Return HexKey as str."""
         return self.__str__()
 
     def verbose(self: "HexKey") -> str:
-        """Return Key as str with verbose information."""
+        """Return HexKey as str with verbose information."""
         return (
             f"HEX key {self.hex_key_size_byte} Byte,"
             f" {self.key_size_symbols} symbols,"
@@ -351,7 +355,7 @@ class PasswordKey(Key):
         return self.__str__()
 
     def verbose(self: "PasswordKey") -> str:
-        """Return Key as str with verbose information."""
+        """Return PasswordKey as str with verbose information."""
         return (
             f"key (plaintext password) with {self.key_size_length} characters: {self.key}\n"
             f"key_md5: {self.key_md5}\n"
@@ -399,13 +403,13 @@ class KeyRing:
         return print(json.dumps(self.keys, default=lambda __o: __o.__dict__))  # noqa: T201
 
     def print_brief(self: "KeyRing") -> None:
-        """Print Keys to CLI without additional information."""
+        """Print keys to CLI without additional information."""
         for key_name in self.keys:
             for key in self.keys[key_name]:
                 print(key.brief())  # noqa: T201
 
     def print_verbose(self: "KeyRing") -> None:
-        """Print Keys to CLI with verbose information."""
+        """Print keys to CLI with verbose information."""
         for key_name in self.keys:
             if key_name in KEY_DESCRIPTIONS:
                 print(KEY_DESCRIPTIONS[key_name])  # noqa: T201
