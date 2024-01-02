@@ -112,7 +112,17 @@ if __name__ == "__main__":
     if args.hex_key:
         key_ring.add_key(key_type="hex_key", length=args.length, number_of_keys=args.number_of_keys)
     if args.password:
-        key_ring.add_key(key_type="password", length=args.length, number_of_keys=args.number_of_keys)
+        key_ring.add_key(
+            key_type="password",
+            length=args.length,
+            number_of_keys=args.number_of_keys,
+            password_lower_ascii=args.password_lower_ascii,
+            password_upper_ascii=args.password_upper_ascii,
+            password_digits=args.password_digits,
+            password_special_characters1=args.password_special_characters1,
+            password_special_characters2=args.password_special_characters2,
+            password_additional_characters=args.password_additional_characters,
+        )
     # Generate keys as example
     if not args.hex_key and not args.password:
         key_ring = example_key_ring(key_ring)
