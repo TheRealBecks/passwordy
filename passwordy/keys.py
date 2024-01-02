@@ -173,7 +173,7 @@ class PasswordKey(Key):
     def _run_openssl(self: "PasswordKey", salt: str, openssl_type: str) -> subprocess.CompletedProcess:
         """Run openssl to generate service keys."""
         return subprocess.run(
-            ["openssl", "passwd", f"-{openssl_type}", "-salt", salt, self.key],  # noqa: S603, S607
+            ["openssl", "passwd", f"-{openssl_type}", "-salt", f"'{salt}'", f"'{self.key}'"],  # noqa: S603, S607
             capture_output=True,
             check=True,
         )
