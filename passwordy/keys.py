@@ -145,7 +145,7 @@ class PasswordKey(Key):
                 and not any(symbol in PASSWORD_SPECIAL_CHARACTERS2 for symbol in key)
             ):
                 continue
-            # Passwords for e.g. BGP should not start with a digit
+            # Passwords for e.g. BGP must not start with a digit
             if check_starting_with_digit and key[0].isdigit():
                 continue
             # Check for duplicate symbols in a row ('no character pair with two equal symbols')
