@@ -88,6 +88,13 @@ key_apr1_salted (e.g. Apache HTTP Server htaccess): $apr1$K9K5s3N7$T3IJ/.KTAxxxx
 [...]
 ```
 
+By default lower and upper ASCII characters and digits are used for password generation. If you need more secure passwords run it as follows:
+```
+python passwordy.py --password_special_characters1 --password_special_characters2
+```
+
+Check `--help` for further information about the characters used for the password generation.
+
 ### Available Options
 
 Check the available options with `--help`:
