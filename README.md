@@ -52,6 +52,8 @@ Passwordy is compatible with **Python 3.9+** as it needs the `secrets` module in
 
 Passwordy can be used on the command line as standalone program or as input for another program when used with the JSON output. You can also import it as a module in your awesome tools!
 
+All HEX keys and hashed passwords listed on this site have been rendered garbage so nobody can copy them for usage on their systems. But you would have never done that, wouldn't you?! 😜
+
 ### Quickstart
 
 Check it out:
@@ -62,9 +64,7 @@ python passwordy.py
 ...will result in:
 ```
 HEX key 4 Byte, 8 symbols, 32 bit: 73xxxxfc
-
 [...]
-
 SHA2 with 512 bit:
 HEX key 64 Byte, 128 symbols, 512 bit: 4988f2c19a05b53a8849875033f0b4b41fef3axxxxxxxxxxxxxxxxxxxxxxxxxxxxf2082ca2f633f8b49a9df942190e3f9f5f2514a6b6fdd570da88b2de64ddc2
 
@@ -169,3 +169,35 @@ Pretty printed with `jq` the output looks like this (shortened):
 ```
 
 You can also combine it with the options listed under `--help`.
+
+### Examples
+
+Generate 4 HEX keys with a length of 20 Byte (= 40 symbols = 160 bit):
+```
+python passwordy.py --hex_key -n 4 -l 20
+OSPFv3 SHA1 authentication, SHA1:
+HEX key 20 Byte, 40 symbols, 160 bit: ebbec2eedb6c3xxxxxxxxxxxxc525cf1c94173c5
+HEX key 20 Byte, 40 symbols, 160 bit: 6f3b84503a061xxxxxxxxxxxx62feed92c444a80
+HEX key 20 Byte, 40 symbols, 160 bit: 9ee20ba3b48ecxxxxxxxxxxxxf699480f23fd728
+HEX key 20 Byte, 40 symbols, 160 bit: 63ad56f2b0686xxxxxxxxxxxxe00d68ab3a919f3
+```
+
+...as JSON output:
+```
+python passwordy.py --hex_key -n 4 -l 20 --json
+```
+
+Generate 16 (default value) passwords with a length of 24 characters and provide all hashes:
+```
+python passwordy.py --password -l 24
+```
+
+Generate 1 password with a length of 24 characters and provide all hashes:
+```
+python passwordy.py --password -l 24 -n 1
+```
+
+Generate 1 password with a length of 24 characters with special characters from `--password_special_characters1` and `--password_special_characters2` and provide all hashes. Check `--help` if you want to know which characters are used:
+```
+python passwordy.py --password -l 24 -n 1 --password_special_characters1 --password_special_characters2
+```
