@@ -201,3 +201,8 @@ Generate 1 password with a length of 24 characters with special characters from 
 ```
 python passwordy.py --password -l 24 -n 1 --password_special_characters1 --password_special_characters2
 ```
+
+Generate 1 password with a default length of 16 characters with lower and upper ASCII characters, digits and characters from `--password_additional_characters`:
+```
+python passwordy.py --password --password_additional_characters .- -n 1
+```

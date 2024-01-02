@@ -88,10 +88,9 @@ def parse_arguments() -> argparse.ArgumentParser:
     )
     args.add_argument(
         "--password_additional_characters",
-        action=argparse.BooleanOptionalAction,
         default="",
         type=str,
-        help=f"Use special characters for password generation including {PASSWORD_SPECIAL_CHARACTERS2}",
+        help="Provide a string with characters for password generation",
     )
 
     return args.parse_args()
