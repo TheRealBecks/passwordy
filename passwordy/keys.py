@@ -172,11 +172,18 @@ class PasswordKey(Key):
 
     def _run_openssl(self: "PasswordKey", salt: str, openssl_type: str) -> subprocess.CompletedProcess:
         """Run openssl to generate service keys."""
-        return subprocess.run(
-            ["openssl", "passwd", f"-{openssl_type}", "-salt", f"'{salt}'", f"'{self.key}'"],  # noqa: S603, S607
-            capture_output=True,
-            check=True,
-        )
+        try:
+            openssl_result = subprocess.run(
+                ["openssl", "passwd", f"-{openssl_type}", "-salt", f"'{salt}'", f"'{self.key}'"],  # noqa: S603, S607
+                capture_output=True,
+                check=True,
+            )
+            return openssl_result.stdout.decode("utf-8").strip() if openssl_result.returncode == 0 else ""
+        # TODO @TheRealBecks: Check if empty string as return is a good idea
+        except FileNotFoundError:
+            return ""
+        except PermissionError:
+            return ""
 
     def _generate_salted_hash(self: "PasswordKey", hash_type: str) -> str:
         """Generate a salted hash."""
@@ -222,8 +229,7 @@ class PasswordKey(Key):
             check_password_strength=False,
             check_starting_with_digit=False,
         )
-        openssl_result = self._run_openssl(salt=salt, openssl_type=hash_types[hash_type]["openssl_type"])
-        return openssl_result.stdout.decode("utf-8").strip() if openssl_result.returncode == 0 else ""
+        return self._run_openssl(salt=salt, openssl_type=hash_types[hash_type]["openssl_type"])
 
     def _generate_salted_hashes(self: "PasswordKey") -> None:
         """Provide all kind of salted hashes for the password."""
