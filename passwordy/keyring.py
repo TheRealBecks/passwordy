@@ -3,8 +3,8 @@
 import json
 from typing import ClassVar
 
-from passwordy.constants import KEY_DESCRIPTIONS
-from passwordy.keys import HexKey, Key, PasswordKey
+from constants import KEY_DESCRIPTIONS
+from keys import HexKey, Key, PasswordKey
 
 
 class KeyRing:
