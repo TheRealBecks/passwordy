@@ -148,7 +148,7 @@ Pretty printed with `jq` the output looks like this (shortened):
       "hex_key_size_byte": 4,
       "key_size_symbols": 8,
       "key_size_bit": 32,
-      "key": "5d6283b0"
+      "key": "5dxxxxb0"
     },
   ],
   "password_8": [
