@@ -102,7 +102,7 @@ Check the available options with `--help`:
 python3 passwordy.py --help
 
 usage: passwordy.py [-h] [--brief | --no-brief] [--hex_key | --no-hex_key] [-j | --json | --no-json] [-l LENGTH] [-n NUMBER_OF_KEYS] [--password | --no-password] [--password_lower_ascii | --no-password_lower_ascii] [--password_upper_ascii | --no-password_upper_ascii] [--password_digits | --no-password_digits]
-                    [--password_special_characters1 | --no-password_special_characters1] [--password_special_characters2 | --no-password_special_characters2] [--password_additional_characters | --no-password_additional_characters]
+                    [--password_special_characters1 | --no-password_special_characters1] [--password_special_characters2 | --no-password_special_characters2] [--password_additional_characters PASSWORD_ADDITIONAL_CHARACTERS]
 
 Secure password and HEX key generator.
 
@@ -129,8 +129,8 @@ options:
                         Use special characters for password generation including .:,;+-=*#_<>()[]§~ (default: False)
   --password_special_characters2, --no-password_special_characters2
                         Use special characters for password generation including !?$& (default: False)
-  --password_additional_characters, --no-password_additional_characters
-                        Use special characters for password generation including !?$& (default: )
+  --password_additional_characters PASSWORD_ADDITIONAL_CHARACTERS
+                        Provide a string with characters for password generation. Using ' or " is not allowed as it will open Pandora's Box of insane automation bugs.
 ```
 
 ### JSON Output
