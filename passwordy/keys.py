@@ -49,11 +49,11 @@ class HexKey(Key):
         self.hex_key_size_byte: int = length
         self.key_size_symbols: int = self.hex_key_size_byte * 2
         self.key_size_bit: int = self.hex_key_size_byte * 8
-        self.key: str = secrets.token_hex(self.hex_key_size_byte)
+        self.key_plaintext: str = secrets.token_hex(self.hex_key_size_byte)
 
     def __str__(self: "HexKey") -> str:
         """Return HexKey as str."""
-        return f"{self.key}"
+        return f"{self.key_plaintext}"
 
     def brief(self: "HexKey") -> str:
         """Return HexKey as str."""
@@ -65,7 +65,7 @@ class HexKey(Key):
             f"HEX key {self.hex_key_size_byte} Byte,"
             f" {self.key_size_symbols} symbols,"
             f" {self.key_size_bit} bit:"
-            f" {self.key}"
+            f" {self.key_plaintext}"
         )
 
 
@@ -159,22 +159,29 @@ class PasswordKey(Key):
 
     def _generate_unsalted_hashes(self: "PasswordKey") -> None:
         """Provide all kind of unsalted hashes for the password."""
-        self.key_md5 = hashlib.md5(self.key.encode(encoding="UTF-8")).hexdigest()  # noqa: S324
-        self.key_sha1 = hashlib.sha1(self.key.encode(encoding="UTF-8")).hexdigest()  # noqa: S324
-        self.key_sha224 = hashlib.sha224(self.key.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha256 = hashlib.sha256(self.key.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha384 = hashlib.sha384(self.key.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha512 = hashlib.sha512(self.key.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha3_224 = hashlib.sha3_224(self.key.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha3_256 = hashlib.sha3_256(self.key.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha3_384 = hashlib.sha3_384(self.key.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha3_512 = hashlib.sha3_512(self.key.encode(encoding="UTF-8")).hexdigest()
+        self.key_md5 = hashlib.md5(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()  # noqa: S324
+        self.key_sha1 = hashlib.sha1(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()  # noqa: S324
+        self.key_sha224 = hashlib.sha224(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha256 = hashlib.sha256(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha384 = hashlib.sha384(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha512 = hashlib.sha512(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha3_224 = hashlib.sha3_224(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha3_256 = hashlib.sha3_256(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha3_384 = hashlib.sha3_384(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
+        self.key_sha3_512 = hashlib.sha3_512(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
 
     def _run_openssl(self: "PasswordKey", salt: str, openssl_type: str) -> subprocess.CompletedProcess:
         """Run openssl to generate service keys."""
         try:
             openssl_result = subprocess.run(
-                ["openssl", "passwd", f"-{openssl_type}", "-salt", f"{salt}", f"'{self.key}'"],  # noqa: S603, S607
+                [
+                    "openssl",
+                    "passwd",
+                    f"-{openssl_type}",
+                    "-salt",
+                    f"{salt}",
+                    f"'{self.key_plaintext}'",
+                ],  # noqa: S603, S607
                 capture_output=True,
                 check=True,
                 text=True,
@@ -269,13 +276,15 @@ class PasswordKey(Key):
             special_characters2=password_special_characters2,
             additional_characters=password_additional_characters,
         )
-        self.key = self._generate_password(key_size_length=self.key_size_length, password_strength=password_strength)
+        self.key_plaintext = self._generate_password(
+            key_size_length=self.key_size_length, password_strength=password_strength
+        )
         self._generate_unsalted_hashes()
         self._generate_salted_hashes()
 
     def __str__(self: "PasswordKey") -> str:
         """Return PasswordKey as str."""
-        return f"{self.key}"
+        return f"{self.key_plaintext}"
 
     def brief(self: "PasswordKey") -> str:
         """Return PasswordKey as str."""
@@ -284,7 +293,7 @@ class PasswordKey(Key):
     def verbose(self: "PasswordKey") -> str:
         """Return PasswordKey as str with verbose information."""
         return (
-            f"key (plaintext password) with {self.key_size_length} characters: {self.key}\n"
+            f"key_plaintext (with {self.key_size_length} characters): {self.key_plaintext}\n"
             f"key_md5: {self.key_md5}\n"
             f"key_sha1: {self.key_sha1}\n"
             f"key_sha224: {self.key_sha224}\n"

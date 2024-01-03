@@ -68,7 +68,7 @@ HEX key 4 Byte, 8 symbols, 32 bit: 73xxxxfc
 SHA2 with 512 bit:
 HEX key 64 Byte, 128 symbols, 512 bit: 4988f2c19a05b53a8849875033f0b4b41fef3axxxxxxxxxxxxxxxxxxxxxxxxxxxxf2082ca2f633f8b49a9df942190e3f9f5f2514a6b6fdd570da88b2de64ddc2
 
-key (plaintext password) with 8 characters: tiUm6zo9
+key_plaintext (with 8 characters): tiUm6zo9
 key_md5: 10a991dafdxxxxxxxxxxxx4974dbccbad
 key_sha1: 77fe98375abc4xxxxxxxxxxxx9d29ed57e635da3c3
 key_sha224: bb89856022ee5xxxxxxxxxxxx9ccafbce5df8e37e075a1c465fc724f
@@ -148,13 +148,13 @@ Pretty printed with `jq` the output looks like this (shortened):
       "hex_key_size_byte": 4,
       "key_size_symbols": 8,
       "key_size_bit": 32,
-      "key": "5dxxxxb0"
+      "key_plaintext": "5dxxxxb0"
     },
   ],
   "password_8": [
     {
       "key_size_length": 8,
-      "key": "YAMHyz4K",
+      "key_plaintext": "YAMHyz4K",
       "key_md5": "eea172389589xxxxxxxxxxxxcaff0bcc",
       "key_sha1": "292520a8ea15abb6aa066xxxxxxxxxxxx49aec0dc7",
       "key_sha224": "884769a77033cc29e26de53e7xxxxxxxxxxxx1ded7ea522c7d61293af",
@@ -209,7 +209,12 @@ Generate 1 password with a length of 24 characters with special characters from 
 python passwordy.py --password -l 24 -n 1 --password_special_characters1 --password_special_characters2
 ```
 
-Generate 1 password with a default length of 16 characters with lower and upper ASCII characters, digits and characters from `--password_additional_characters`:
+Generate 1 password with a default length of 16 characters with lower and upper ASCII characters, digits and characters from `--password_additional_characters` and provide all hashes:
 ```
-python passwordy.py --password --password_additional_characters .- -n 1
+python passwordy.py --password --password_additional_characters ".-" -n 1
+```
+
+Generate 1 password with a default length of 16 characters with lowerASCII characters and digits and provide all hashes:
+```
+python passwordy.py --password --no-password_upper_ascii -n 1
 ```
