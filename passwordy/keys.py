@@ -102,7 +102,7 @@ class PasswordKey(Key):
             selected_symbols += PASSWORD_SPECIAL_CHARACTERS1
         if special_characters2:
             selected_symbols += PASSWORD_SPECIAL_CHARACTERS2
-        if additional_characters != "":
+        if additional_characters:
             selected_symbols += additional_characters
         password_strength["selected_symbols"] = selected_symbols
 
@@ -253,6 +253,14 @@ class PasswordKey(Key):
     ) -> None:
         """Initialize PasswordKey."""
         self.key_size_length: int = length
+
+        # Remove ' and " from additional_characters as these ones are not allowed
+        if "'" in password_additional_characters:
+            password_additional_characters = password_additional_characters.replace("'", "")
+        if '"' in password_additional_characters:
+            password_additional_characters = password_additional_characters.replace('"', "")
+
+        # Get all symbols for password generation
         password_strength = self._password_strength(
             lower_ascii=password_lower_ascii,
             upper_ascii=password_upper_ascii,

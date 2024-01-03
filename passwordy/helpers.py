@@ -92,7 +92,7 @@ def parse_arguments() -> argparse.ArgumentParser:
         type=str,
         help=(
             "Provide a string with characters for password generation. "
-            "Avoid using ' or \" as it will open Pandora's Box of insane automation bugs."
+            "Using ' or \" is not allowed as it will open Pandora's Box of insane automation bugs."
         ),
     )
 
