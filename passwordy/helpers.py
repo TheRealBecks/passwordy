@@ -5,6 +5,7 @@ import argparse
 from constants import PASSWORD_SPECIAL_CHARACTERS1, PASSWORD_SPECIAL_CHARACTERS2
 
 
+# TODO @TheRealBecks: Add --input for existing passwords
 def parse_arguments() -> argparse.ArgumentParser:
     """Parse arguments."""
     args = argparse.ArgumentParser(description="Secure password and HEX key generator.")

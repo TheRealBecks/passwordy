@@ -104,6 +104,7 @@ class PasswordKey(Key):
             selected_symbols += PASSWORD_SPECIAL_CHARACTERS2
         if additional_characters:
             selected_symbols += additional_characters
+        # TODO @TheRealBecks: Check if selected_symbols are empty and raise an exception
         password_strength["selected_symbols"] = selected_symbols
 
         return password_strength
