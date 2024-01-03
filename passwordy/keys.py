@@ -117,6 +117,10 @@ class PasswordKey(Key):
         check_starting_with_digit: bool = True,
     ) -> str:
         """Generate a good password with optionally at least 1 symbol out of each defined symbol group."""
+        # Check if selected_symbols are only digits and then disable check_starting_with_digit
+        if check_starting_with_digit and password_strength["selected_symbols"].isdigit():
+            check_starting_with_digit = False
+        # Generate password
         while True:
             key: str = "".join(secrets.choice(password_strength["selected_symbols"]) for _ in range(key_size_length))
             if (
@@ -174,14 +178,14 @@ class PasswordKey(Key):
         """Run openssl to generate service keys."""
         try:
             openssl_result = subprocess.run(
-                [
+                [  # noqa: S603, S607
                     "openssl",
                     "passwd",
                     f"-{openssl_type}",
                     "-salt",
                     f"{salt}",
                     f"'{self.key_plaintext}'",
-                ],  # noqa: S603, S607
+                ],
                 capture_output=True,
                 check=True,
                 text=True,

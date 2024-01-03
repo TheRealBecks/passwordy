@@ -218,3 +218,8 @@ Generate 1 password with a default length of 16 characters with lowerASCII chara
 ```
 python passwordy.py --password --no-password_upper_ascii -n 1
 ```
+
+Generate 1 password with a default length of 16 characters and digits only and provide all hashes. In that case the password can't be used for protocols like BGP:
+```
+python passwordy.py --password --no-password_upper_ascii --no-password_lower_ascii -n 1
+```
