@@ -108,8 +108,6 @@ def main() -> None:
     if args.input_prompt:
         # Get password from user input
         password_plaintext = get_password()
-        # In any case we want to add the password hashes to the key ring
-        args.password = True
 
     # Create a KeyRing object to store keys
     key_ring = KeyRing()
