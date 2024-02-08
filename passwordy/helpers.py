@@ -1,11 +1,16 @@
 """Helper functions for Passwordy."""
 
 import argparse
+from getpass import getpass
 
 from constants import PASSWORD_SPECIAL_CHARACTERS1, PASSWORD_SPECIAL_CHARACTERS2
 
 
-# TODO @TheRealBecks: Add --input for existing passwords
+def get_password() -> str:
+    """Get password from user input."""
+    return getpass()
+
+
 def parse_arguments() -> argparse.ArgumentParser:
     """Parse arguments."""
     args = argparse.ArgumentParser(description="Secure password and HEX key generator.")
@@ -22,6 +27,14 @@ def parse_arguments() -> argparse.ArgumentParser:
         default=False,
         type=bool,
         help="Generate HEX key.",
+    )
+    args.add_argument(
+        "-i",
+        "--input_prompt",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        type=bool,
+        help="Provide your existing password in a secure prompt.",
     )
     args.add_argument(
         "-j",
@@ -97,4 +110,17 @@ def parse_arguments() -> argparse.ArgumentParser:
         ),
     )
 
-    return args.parse_args()
+    parsed_args = args.parse_args()
+
+    # Enabling the password generation will disable the HEX key generation if not explicitely enabled with --hex_key
+    if parsed_args.input_prompt and parsed_args.password is False:
+        parsed_args.password = True
+    # If no key type is specified, we will generate both
+    if parsed_args.password is False and parsed_args.hex_key is False:
+        parsed_args.password = True
+        parsed_args.hex_key = True
+    # No other output than JSON allowed
+    if parsed_args.json:
+        parsed_args.brief = False
+
+    return parsed_args

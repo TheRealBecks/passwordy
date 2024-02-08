@@ -3,11 +3,11 @@
 import argparse
 import sys
 
-from helpers import parse_arguments
+from helpers import get_password, parse_arguments
 from keyring import KeyRing
 
 
-def example_key_ring(key_ring: KeyRing) -> KeyRing:
+def example_key_ring(key_ring: KeyRing, args: argparse.ArgumentParser) -> KeyRing:
     """Create a HexKeyRing with example data."""
     key_ring.add_key(key_type="hex_key", length=4, number_of_keys=4)
     key_ring.add_key(key_type="hex_key", length=8, number_of_keys=4)
@@ -100,13 +100,18 @@ def example_key_ring(key_ring: KeyRing) -> KeyRing:
     return key_ring
 
 
-if __name__ == "__main__":
-    if sys.version_info < (3, 9):  # noqa: UP036
-        print("Python 3.9 or higher is required.")  # noqa: T201
-        sys.exit(1)
-
+def main() -> None:
+    """Execute main function."""
     args: argparse.ArgumentParser = parse_arguments()
 
+    password_plaintext: str = ""
+    if args.input_prompt:
+        # Get password from user input
+        password_plaintext = get_password()
+        # In any case we want to add the password hashes to the key ring
+        args.password = True
+
+    # Create a KeyRing object to store keys
     key_ring = KeyRing()
 
     if args.hex_key:
@@ -116,6 +121,7 @@ if __name__ == "__main__":
             key_type="password",
             length=args.length,
             number_of_keys=args.number_of_keys,
+            password_plaintext=password_plaintext,
             password_lower_ascii=args.password_lower_ascii,
             password_upper_ascii=args.password_upper_ascii,
             password_digits=args.password_digits,
@@ -125,7 +131,7 @@ if __name__ == "__main__":
         )
     # Generate keys as example
     if not args.hex_key and not args.password:
-        key_ring = example_key_ring(key_ring)
+        key_ring = example_key_ring(key_ring, args)
 
     # generate JSON as output...
     if args.json:
@@ -135,4 +141,12 @@ if __name__ == "__main__":
         key_ring.print_brief()
     else:
         key_ring.print_verbose()
+
+
+if __name__ == "__main__":
+    if sys.version_info < (3, 9):  # noqa: UP036
+        print("Python 3.9 or higher is required.")  # noqa: T201
+        sys.exit(1)
+
+    main()
     sys.exit(0)

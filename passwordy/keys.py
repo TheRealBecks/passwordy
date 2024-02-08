@@ -109,7 +109,7 @@ class PasswordKey(Key):
 
         return password_strength
 
-    def _generate_password(
+    def _generate_password(  # noqa: C901
         self: "PasswordKey",
         *,
         key_size_length: int,
@@ -121,6 +121,18 @@ class PasswordKey(Key):
         # Check if selected_symbols are only digits and then disable check_starting_with_digit
         if check_starting_with_digit and password_strength["selected_symbols"].isdigit():
             check_starting_with_digit = False
+        # Check if password_strength["selected_symbols"] provides symbols for the password generation
+        if password_strength["selected_symbols"] == "":
+            msg: str = (
+                "No symbols for password generation provided. Use symbols provided with "
+                "--password_lower_ascii, "
+                "--password_upper_ascii, "
+                "--password_digits, "
+                "--password_special_characters1, "
+                "--password_special_characters2, or "
+                "--password_additional_characters."
+            )
+            raise ValueError(msg)
         # Generate password
         while True:
             key: str = "".join(secrets.choice(password_strength["selected_symbols"]) for _ in range(key_size_length))
@@ -256,6 +268,7 @@ class PasswordKey(Key):
         self: "PasswordKey",
         length: int,
         *,
+        password_plaintext: str = "",
         password_lower_ascii: bool = True,
         password_upper_ascii: bool = True,
         password_digits: bool = True,
@@ -281,8 +294,12 @@ class PasswordKey(Key):
             special_characters2=password_special_characters2,
             additional_characters=password_additional_characters,
         )
-        self.key_plaintext = self._generate_password(
-            key_size_length=self.key_size_length, password_strength=password_strength
+
+        # Generate a password if no password_plaintext is provided
+        self.key_plaintext: str = (
+            password_plaintext
+            if password_plaintext
+            else self._generate_password(key_size_length=self.key_size_length, password_strength=password_strength)
         )
         self._generate_unsalted_hashes()
         self._generate_salted_hashes()

@@ -8,6 +8,8 @@ Not anymore! 😄
 
 There are many tools out there that need HEX encoded passwords as their input. Passwordy will generate you a **plaintext password** and derives several **HEX keys** with different lengths and also (optionally salted) **password hashes** that can be used for the good OSes out there. 👍 (Unfortunately there's currently no support for bcrypted hashes that are needed for OSes like *BSD 😥)
 
+If you already have a password but need the hashes you can also use Passwordy for that!
+
 Passwordy will generate...
 
 ...the following **HEX keys** by default:
@@ -95,14 +97,19 @@ python passwordy.py --password_special_characters1 --password_special_characters
 
 Check `--help` for further information about the characters used for the password generation.
 
+If a password already exists, but the password hashes are needed use `--input_prompt`. `--password` is optional and will be set to `True` is any case:
+```
+python passwordy.py --password --input_prompt
+```
+
 ### Available Options
 
 Check the available options with `--help`:
 ```
 python3 passwordy.py --help
 
-usage: passwordy.py [-h] [--brief | --no-brief] [--hex_key | --no-hex_key] [-j | --json | --no-json] [-l LENGTH] [-n NUMBER_OF_KEYS] [--password | --no-password] [--password_lower_ascii | --no-password_lower_ascii] [--password_upper_ascii | --no-password_upper_ascii] [--password_digits | --no-password_digits]
-                    [--password_special_characters1 | --no-password_special_characters1] [--password_special_characters2 | --no-password_special_characters2] [--password_additional_characters PASSWORD_ADDITIONAL_CHARACTERS]
+usage: passwordy.py [-h] [--brief | --no-brief] [--hex_key | --no-hex_key] [-i | --input_prompt | --no-input_prompt] [-j | --json | --no-json] [-l LENGTH] [-n NUMBER_OF_KEYS] [--password | --no-password] [--password_lower_ascii | --no-password_lower_ascii] [--password_upper_ascii | --no-password_upper_ascii]
+                    [--password_digits | --no-password_digits] [--password_special_characters1 | --no-password_special_characters1] [--password_special_characters2 | --no-password_special_characters2] [--password_additional_characters PASSWORD_ADDITIONAL_CHARACTERS]
 
 Secure password and HEX key generator.
 
@@ -111,6 +118,8 @@ options:
   --brief, --no-brief   Brief output. (default: False)
   --hex_key, --no-hex_key
                         Generate HEX key. (default: False)
+  -i, --input_prompt, --no-input_prompt
+                        Provide your existing password in a secure prompt. (default: False)
   -j, --json, --no-json
                         Return keys as JSON. (default: False)
   -l LENGTH, --length LENGTH
@@ -178,6 +187,11 @@ Pretty printed with `jq` the output looks like this (shortened):
 You can also combine it with the options listed under `--help`.
 
 ### Examples
+
+If a password already exists, but the password hashes are needed use `--input_prompt`. `--password` is optional and will be set to `True` is any case:
+```
+python passwordy.py --password --input_prompt
+```
 
 Generate 4 HEX keys with a length of 20 Byte (= 40 symbols = 160 bit):
 ```
