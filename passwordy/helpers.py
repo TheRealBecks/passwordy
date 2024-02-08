@@ -109,6 +109,21 @@ def parse_arguments() -> argparse.ArgumentParser:
             "Using ' or \" is not allowed as it will open Pandora's Box of insane automation bugs."
         ),
     )
+    args.add_argument(
+        "-s",
+        "--secure",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        type=bool,
+        help=(
+            "Secure passwords: Shortcut for "
+            "--password_lower_ascii, "
+            "--password_upper_ascii, "
+            "--password_digits, "
+            "--password_special_characters1, "
+            "--password_special_characters2, "
+        ),
+    )
 
     parsed_args = args.parse_args()
 
@@ -122,5 +137,12 @@ def parse_arguments() -> argparse.ArgumentParser:
     # No other output than JSON allowed
     if parsed_args.json:
         parsed_args.brief = False
+    # Overwrite password symbols if --secure is used
+    if parsed_args.secure:
+        parsed_args.password_lower_ascii = True
+        parsed_args.password_upper_ascii = True
+        parsed_args.password_digits = True
+        parsed_args.password_special_characters1 = True
+        parsed_args.password_special_characters2 = True
 
     return parsed_args
