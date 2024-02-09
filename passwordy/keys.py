@@ -275,9 +275,11 @@ class PasswordKey(Key):
         password_special_characters1: bool = False,
         password_special_characters2: bool = False,
         password_additional_characters: str = "",
+        show_plaintext_password: bool = False,
     ) -> None:
         """Initialize PasswordKey."""
         self.key_size_length: int = length
+        self.show_plaintext_password: bool = show_plaintext_password
 
         # Remove ' and " from additional_characters as these ones are not allowed
         if "'" in password_additional_characters:
@@ -296,13 +298,22 @@ class PasswordKey(Key):
         )
 
         # Generate a password if no password_plaintext is provided
-        self.key_plaintext: str = (
-            password_plaintext
-            if password_plaintext
-            else self._generate_password(key_size_length=self.key_size_length, password_strength=password_strength)
-        )
+        if password_plaintext:
+            self.key_plaintext: str = password_plaintext
+            del password_plaintext
+        else:
+            self.key_plaintext: str = self._generate_password(
+                key_size_length=self.key_size_length, password_strength=password_strength
+            )
         self._generate_unsalted_hashes()
         self._generate_salted_hashes()
+
+        # Delete password_plaintext for security reasons
+        if not show_plaintext_password:
+            del self.key_plaintext
+            self.key_plaintext = ""
+        else:
+            self.key_size_length: int = self.key_plaintext.__len__()
 
     def __str__(self: "PasswordKey") -> str:
         """Return PasswordKey as str."""
@@ -313,9 +324,13 @@ class PasswordKey(Key):
         return self.__str__()
 
     def verbose(self: "PasswordKey") -> str:
-        """Return PasswordKey as str with verbose information."""
-        return (
+        """Return PasswordKey and hashes as multiline str with verbose information."""
+        output: str = (
             f"key_plaintext (with {self.key_size_length} characters): {self.key_plaintext}\n"
+            if self.show_plaintext_password
+            else ""
+        )
+        output += (
             f"key_md5: {self.key_md5}\n"
             f"key_sha1: {self.key_sha1}\n"
             f"key_sha224: {self.key_sha224}\n"
@@ -332,3 +347,5 @@ class PasswordKey(Key):
             f"key_sha512_salted (e.g. Linux-based systems, Arista EOS, Juniper Junos): {self.key_sha512_salted}\n"
             f"key_apr1_salted (e.g. Apache HTTP Server htaccess): {self.key_apr1_salted}\n"
         )
+
+        return output

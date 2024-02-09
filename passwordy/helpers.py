@@ -55,8 +55,8 @@ def parse_arguments() -> argparse.ArgumentParser:
         "-n",
         "--number_of_keys",
         type=int,
-        default=16,
-        help="Number of keys, default value is 16.",
+        default=1,
+        help="Number of keys, default value is 1.",
     )
     args.add_argument(
         "--password",
@@ -124,11 +124,18 @@ def parse_arguments() -> argparse.ArgumentParser:
             "--password_special_characters2, "
         ),
     )
+    args.add_argument(
+        "--show_plaintext_password",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        type=bool,
+        help="Show plaintext password in output.",
+    )
 
     parsed_args = args.parse_args()
 
     # Enabling the password generation will disable the HEX key generation if not explicitely enabled with --hex_key
-    if parsed_args.input_prompt and parsed_args.password is False:
+    if parsed_args.input_prompt and not parsed_args.password:
         parsed_args.password = True
     # No other output than JSON allowed
     if parsed_args.json:

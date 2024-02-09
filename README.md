@@ -110,6 +110,7 @@ python3 passwordy.py --help
 
 usage: passwordy.py [-h] [--brief | --no-brief] [--hex_key | --no-hex_key] [-i | --input_prompt | --no-input_prompt] [-j | --json | --no-json] [-l LENGTH] [-n NUMBER_OF_KEYS] [--password | --no-password] [--password_lower_ascii | --no-password_lower_ascii] [--password_upper_ascii | --no-password_upper_ascii]
                     [--password_digits | --no-password_digits] [--password_special_characters1 | --no-password_special_characters1] [--password_special_characters2 | --no-password_special_characters2] [--password_additional_characters PASSWORD_ADDITIONAL_CHARACTERS] [-s | --secure | --no-secure]
+                    [--show_plaintext_password | --no-show_plaintext_password]
 
 Secure password and HEX key generator.
 
@@ -125,7 +126,7 @@ options:
   -l LENGTH, --length LENGTH
                         Number of characters for passwords or the HEX key size in Byte: 1 Byte == 2 Symbols == 8 bit.
   -n NUMBER_OF_KEYS, --number_of_keys NUMBER_OF_KEYS
-                        Number of keys, default value is 16.
+                        Number of keys, default value is 1.
   --password, --no-password
                         Generate passwords. (default: False)
   --password_lower_ascii, --no-password_lower_ascii
@@ -142,6 +143,8 @@ options:
                         Provide a string with characters for password generation. Using ' or " is not allowed as it will open Pandora's Box of insane automation bugs.
   -s, --secure, --no-secure
                         Secure passwords: Shortcut for --password_lower_ascii, --password_upper_ascii, --password_digits, --password_special_characters1, --password_special_characters2, (default: False)
+  --show_plaintext_password, --no-show_plaintext_password
+                        Show plaintext password in output. (default: False)
 ```
 
 ### JSON Output
