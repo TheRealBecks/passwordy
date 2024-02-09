@@ -130,10 +130,6 @@ def parse_arguments() -> argparse.ArgumentParser:
     # Enabling the password generation will disable the HEX key generation if not explicitely enabled with --hex_key
     if parsed_args.input_prompt and parsed_args.password is False:
         parsed_args.password = True
-    # If no key type is specified, we will generate both
-    if parsed_args.password is False and parsed_args.hex_key is False:
-        parsed_args.password = True
-        parsed_args.hex_key = True
     # No other output than JSON allowed
     if parsed_args.json:
         parsed_args.brief = False
