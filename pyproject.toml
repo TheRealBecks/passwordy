@@ -7,9 +7,9 @@ include = '\.pyi?$'
 line-length = 120
 target-version = "py310"
 # Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL"]
-select = ["ALL"]
-ignore = ["COM812", "D203", "D212", "D415", "FIX002", "TD003"]
+lint.fixable = ["ALL"]
+lint.select = ["ALL"]
+lint.ignore = ["COM812", "D203", "D212", "D415", "FIX002", "TD003"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["D104", "F401"]
