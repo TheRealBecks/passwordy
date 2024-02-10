@@ -133,9 +133,10 @@ def main() -> None:
             password_special_characters1=args.password_special_characters1,
             password_special_characters2=args.password_special_characters2,
             password_additional_characters=args.password_additional_characters,
+            allow_all_characters=args.allow_all_characters,
             show_plaintext_password=args.show_plaintext_password,
         )
-    # Generate keys as example
+    # Generate example keys
     if not args.hex_key and not args.password:
         key_ring = example_key_ring(key_ring, args)
 

@@ -6,6 +6,7 @@ PasswordKey: Password key
 """
 
 import hashlib
+import re
 import secrets
 import string
 import subprocess
@@ -13,6 +14,7 @@ from abc import ABC, abstractmethod
 from functools import reduce
 
 from constants import (
+    PASSWORD_FORBIDDEN_CHARACTERS,
     PASSWORD_LENGTH_WITHOUT_REPETITION,
     PASSWORD_SPECIAL_CHARACTERS1,
     PASSWORD_SPECIAL_CHARACTERS2,
@@ -133,6 +135,7 @@ class PasswordKey(Key):
                 "--password_additional_characters."
             )
             raise ValueError(msg)
+
         # Generate password
         while True:
             key: str = "".join(secrets.choice(password_strength["selected_symbols"]) for _ in range(key_size_length))
@@ -276,6 +279,7 @@ class PasswordKey(Key):
         password_special_characters1: bool = False,
         password_special_characters2: bool = False,
         password_additional_characters: str = "",
+        allow_all_characters: bool = False,
         show_plaintext_password: bool = False,
     ) -> None:
         """Initialize PasswordKey."""
@@ -298,14 +302,36 @@ class PasswordKey(Key):
             additional_characters=password_additional_characters,
         )
 
-        # Generate a password if no password_plaintext is provided
+        # Search for forbidden characters in password and password_additional_characters
+        regex = re.compile(f"[{PASSWORD_FORBIDDEN_CHARACTERS}]")
+
+        # Check for not allowed characters in --password_plaintext
+        if regex.search(password_plaintext) is not None and not allow_all_characters:
+            msg: str = (
+                "Password contains forbidden characters: "
+                f"{PASSWORD_FORBIDDEN_CHARACTERS} (whitespaces are also forbidden)\n"
+                "Not recommended: Use --allow_all_characters to allow all characters."
+            )
+            raise ValueError(msg)
+        # Check for not allowed characters in --password_additional_characters
+        if regex.search(password_additional_characters) is not None and not allow_all_characters:
+            msg: str = (
+                "--password_additional_characters contains forbidden characters: "
+                f"{PASSWORD_FORBIDDEN_CHARACTERS} (whitespaces are also forbidden)\n"
+                "Not recommended: Use --allow_all_characters to allow all characters."
+            )
+            raise ValueError(msg)
+        # Use provided password
         if password_plaintext:
             self.key_plaintext: str = password_plaintext
             del password_plaintext
+        # Generate a password if no password_plaintext is provided
         else:
             self.key_plaintext: str = self._generate_password(
                 key_size_length=self.key_size_length, password_strength=password_strength
             )
+
+        # Generate hashes out of self.key_plaintext
         self._generate_unsalted_hashes()
         self._generate_salted_hashes()
 

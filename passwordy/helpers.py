@@ -3,7 +3,7 @@
 import argparse
 from getpass import getpass
 
-from constants import PASSWORD_SPECIAL_CHARACTERS1, PASSWORD_SPECIAL_CHARACTERS2
+from constants import PASSWORD_FORBIDDEN_CHARACTERS, PASSWORD_SPECIAL_CHARACTERS1, PASSWORD_SPECIAL_CHARACTERS2
 
 
 def get_password() -> str:
@@ -130,6 +130,16 @@ def parse_arguments() -> argparse.ArgumentParser:
         default=False,
         type=bool,
         help="Show plaintext password in output.",
+    )
+    args.add_argument(
+        "--allow_all_characters",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        type=bool,
+        help=(
+            "Not recommended: Allow all characters for password generation: "
+            f"{PASSWORD_FORBIDDEN_CHARACTERS} (and whitespace)."
+        ),
     )
 
     parsed_args = args.parse_args()

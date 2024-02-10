@@ -1,7 +1,10 @@
 """Constants for passwordy."""
 
-PASSWORD_SPECIAL_CHARACTERS1: str = ".:,;+-=*#_<>()[]§~"
+PASSWORD_SPECIAL_CHARACTERS1: str = ".:,;+-=*#_<>()[]~"
 PASSWORD_SPECIAL_CHARACTERS2: str = "!?$&"
+
+# Not allowed characters due to best practices and vendor incompatible characters
+PASSWORD_FORBIDDEN_CHARACTERS: str = "'\"§ "
 
 # Passwords with a length of 32 characters or less should not contain duplicate symbols in a row
 # Let's say 'no character pair with two equal symbols'
