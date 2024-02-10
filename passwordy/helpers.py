@@ -22,7 +22,7 @@ def parse_arguments() -> argparse.ArgumentParser:
         help="Brief output.",
     )
     args.add_argument(
-        "--hex_key",
+        "--hex-key",
         action=argparse.BooleanOptionalAction,
         default=False,
         type=bool,
@@ -30,7 +30,7 @@ def parse_arguments() -> argparse.ArgumentParser:
     )
     args.add_argument(
         "-i",
-        "--input_prompt",
+        "--input-prompt",
         action=argparse.BooleanOptionalAction,
         default=False,
         type=bool,
@@ -53,7 +53,7 @@ def parse_arguments() -> argparse.ArgumentParser:
     )
     args.add_argument(
         "-n",
-        "--number_of_keys",
+        "--number-of-keys",
         type=int,
         default=1,
         help="Number of keys, default value is 1.",
@@ -66,42 +66,42 @@ def parse_arguments() -> argparse.ArgumentParser:
         help="Generate passwords.",
     )
     args.add_argument(
-        "--password_lower_ascii",
+        "--password-lower-ascii",
         action=argparse.BooleanOptionalAction,
         default=True,
         type=bool,
         help="Use lower ASCII letters for password generation.",
     )
     args.add_argument(
-        "--password_upper_ascii",
+        "--password-upper-ascii",
         action=argparse.BooleanOptionalAction,
         default=True,
         type=bool,
         help="Use upper ASCII letters for password generation.",
     )
     args.add_argument(
-        "--password_digits",
+        "--password-digits",
         action=argparse.BooleanOptionalAction,
         default=True,
         type=bool,
         help="Use digits for password generation.",
     )
     args.add_argument(
-        "--password_special_characters1",
+        "--password-special-characters1",
         action=argparse.BooleanOptionalAction,
         default=False,
         type=bool,
         help=f"Use special characters for password generation including {PASSWORD_SPECIAL_CHARACTERS1}",
     )
     args.add_argument(
-        "--password_special_characters2",
+        "--password-special-characters2",
         action=argparse.BooleanOptionalAction,
         default=False,
         type=bool,
         help=f"Use special characters for password generation including {PASSWORD_SPECIAL_CHARACTERS2}",
     )
     args.add_argument(
-        "--password_additional_characters",
+        "--password-additional-characters",
         default="",
         type=str,
         help=(
@@ -117,22 +117,22 @@ def parse_arguments() -> argparse.ArgumentParser:
         type=bool,
         help=(
             "Secure passwords: Shortcut for "
-            "--password_lower_ascii, "
-            "--password_upper_ascii, "
-            "--password_digits, "
-            "--password_special_characters1, "
-            "--password_special_characters2, "
+            "--password-lower-ascii, "
+            "--password-upper-ascii, "
+            "--password-digits, "
+            "--password-special-characters1, "
+            "--password-special-characters2, "
         ),
     )
     args.add_argument(
-        "--show_plaintext_password",
+        "--show-plaintext-password",
         action=argparse.BooleanOptionalAction,
         default=False,
         type=bool,
         help="Show plaintext password in output.",
     )
     args.add_argument(
-        "--allow_all_characters",
+        "--allow-all-characters",
         action=argparse.BooleanOptionalAction,
         default=False,
         type=bool,
@@ -144,7 +144,7 @@ def parse_arguments() -> argparse.ArgumentParser:
 
     parsed_args = args.parse_args()
 
-    # Enabling the password generation will disable the HEX key generation if not explicitely enabled with --hex_key
+    # Enabling the password generation will disable the HEX key generation if not explicitely enabled with --hex-key
     if parsed_args.input_prompt and not parsed_args.password:
         parsed_args.password = True
     # No other output than JSON allowed

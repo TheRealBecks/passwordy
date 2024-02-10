@@ -127,12 +127,12 @@ class PasswordKey(Key):
         if password_strength["selected_symbols"] == "":
             msg: str = (
                 "No symbols for password generation provided. Use symbols provided with "
-                "--password_lower_ascii, "
-                "--password_upper_ascii, "
-                "--password_digits, "
-                "--password_special_characters1, "
-                "--password_special_characters2, or "
-                "--password_additional_characters."
+                "--password-lower-ascii, "
+                "--password-upper-ascii, "
+                "--password-digits, "
+                "--password-special-characters1, "
+                "--password-special-characters2, or "
+                "--password-additional-characters."
             )
             raise ValueError(msg)
 
@@ -310,15 +310,15 @@ class PasswordKey(Key):
             msg: str = (
                 "Password contains forbidden characters: "
                 f"{PASSWORD_FORBIDDEN_CHARACTERS} (whitespaces are also forbidden)\n"
-                "Not recommended: Use --allow_all_characters to allow all characters."
+                "Not recommended: Use --allow-all-characters to allow all characters."
             )
             raise ValueError(msg)
-        # Check for not allowed characters in --password_additional_characters
+        # Check for not allowed characters in --password-additional-characters
         if regex.search(password_additional_characters) is not None and not allow_all_characters:
             msg: str = (
-                "--password_additional_characters contains forbidden characters: "
+                "--password-additional-characters contains forbidden characters: "
                 f"{PASSWORD_FORBIDDEN_CHARACTERS} (whitespaces are also forbidden)\n"
-                "Not recommended: Use --allow_all_characters to allow all characters."
+                "Not recommended: Use --allow-all-characters to allow all characters."
             )
             raise ValueError(msg)
         # Use provided password

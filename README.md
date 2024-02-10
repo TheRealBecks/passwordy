@@ -92,14 +92,14 @@ key_apr1_salted (e.g. Apache HTTP Server htaccess): $apr1$K9K5s3N7$T3IJ/.KTAxxxx
 
 By default lower and upper ASCII characters and digits are used for password generation and leading digits are avoided so you can sefely use them for protocls like **BGP, OSPF and IS-IS**. If you need more secure passwords run it as follows:
 ```
-python passwordy.py --password_special_characters1 --password_special_characters2
+python passwordy.py --password-special-characters1 --password-special-characters2
 ```
 
 Check `--help` for further information about the characters used for the password generation.
 
-If a password already exists, but the password hashes are needed use `--input_prompt`. `--password` is optional and will be set to `True` is any case:
+If a password already exists, but the password hashes are needed use `--input-prompt`. `--password` is optional and will be set to `True` is any case:
 ```
-python passwordy.py --password --input_prompt
+python passwordy.py --password --input-prompt
 ```
 
 ### Available Options
@@ -108,44 +108,44 @@ Check the available options with `--help`:
 ```
 python3 passwordy.py --help
 
-usage: passwordy.py [-h] [--brief | --no-brief] [--hex_key | --no-hex_key] [-i | --input_prompt | --no-input_prompt] [-j | --json | --no-json] [-l LENGTH] [-n NUMBER_OF_KEYS] [--password | --no-password] [--password_lower_ascii | --no-password_lower_ascii] [--password_upper_ascii | --no-password_upper_ascii]
-                    [--password_digits | --no-password_digits] [--password_special_characters1 | --no-password_special_characters1] [--password_special_characters2 | --no-password_special_characters2] [--password_additional_characters PASSWORD_ADDITIONAL_CHARACTERS] [-s | --secure | --no-secure]
-                    [--show_plaintext_password | --no-show_plaintext_password] [--allow_all_characters | --no-allow_all_characters]
+usage: passwordy.py [-h] [--brief | --no-brief] [--hex-key | --no-hex-key] [-i | --input-prompt | --no-input-prompt] [-j | --json | --no-json] [-l LENGTH] [-n NUMBER_OF_KEYS] [--password | --no-password] [--password-lower-ascii | --no-password-lower-ascii] [--password-upper-ascii | --no-password-upper-ascii]
+                    [--password-digits | --no-password-digits] [--password-special-characters1 | --no-password-special-characters1] [--password-special-characters2 | --no-password-special-characters2] [--password-additional-characters PASSWORD_ADDITIONAL_CHARACTERS] [-s | --secure | --no-secure]
+                    [--show-plaintext-password | --no-show-plaintext-password] [--allow-all-characters | --no-allow-all-characters]
 
 Secure password and HEX key generator.
 
 options:
   -h, --help            show this help message and exit
   --brief, --no-brief   Brief output. (default: False)
-  --hex_key, --no-hex_key
+  --hex-key, --no-hex-key
                         Generate HEX key. (default: False)
-  -i, --input_prompt, --no-input_prompt
+  -i, --input-prompt, --no-input-prompt
                         Provide your existing password in a secure prompt. (default: False)
   -j, --json, --no-json
                         Return keys as JSON. (default: False)
   -l LENGTH, --length LENGTH
                         Number of characters for passwords or the HEX key size in Byte: 1 Byte == 2 Symbols == 8 bit.
-  -n NUMBER_OF_KEYS, --number_of_keys NUMBER_OF_KEYS
+  -n NUMBER_OF_KEYS, --number-of-keys NUMBER_OF_KEYS
                         Number of keys, default value is 1.
   --password, --no-password
                         Generate passwords. (default: False)
-  --password_lower_ascii, --no-password_lower_ascii
+  --password-lower-ascii, --no-password-lower-ascii
                         Use lower ASCII letters for password generation. (default: True)
-  --password_upper_ascii, --no-password_upper_ascii
+  --password-upper-ascii, --no-password-upper-ascii
                         Use upper ASCII letters for password generation. (default: True)
-  --password_digits, --no-password_digits
+  --password-digits, --no-password-digits
                         Use digits for password generation. (default: True)
-  --password_special_characters1, --no-password_special_characters1
+  --password-special-characters1, --no-password-special-characters1
                         Use special characters for password generation including .:,;+-=*#_<>()[]~ (default: False)
-  --password_special_characters2, --no-password_special_characters2
+  --password-special-characters2, --no-password-special-characters2
                         Use special characters for password generation including !?$& (default: False)
-  --password_additional_characters PASSWORD_ADDITIONAL_CHARACTERS
+  --password-additional-characters PASSWORD_ADDITIONAL_CHARACTERS
                         Provide a string with characters for password generation. Using ' or " is not allowed as it will open Pandora's Box of insane automation bugs.
   -s, --secure, --no-secure
-                        Secure passwords: Shortcut for --password_lower_ascii, --password_upper_ascii, --password_digits, --password_special_characters1, --password_special_characters2, (default: False)
-  --show_plaintext_password, --no-show_plaintext_password
+                        Secure passwords: Shortcut for --password-lower-ascii, --password-upper-ascii, --password-digits, --password-special-characters1, --password-special-characters2, (default: False)
+  --show-plaintext-password, --no-show-plaintext-password
                         Show plaintext password in output. (default: False)
-  --allow_all_characters, --no-allow_all_characters
+  --allow-all-characters, --no-allow-all-characters
                         Not recommended: Allow all characters for password generation: '"§ (and whitespace). (default: False)
 ```
 
@@ -195,14 +195,14 @@ You can also combine it with the options listed under `--help`.
 
 ### Examples
 
-If a password already exists, but the password hashes are needed use `--input_prompt`. `--password` is optional and will be set to `True` is any case:
+If a password already exists, but the password hashes are needed use `--input-prompt`. `--password` is optional and will be set to `True` is any case:
 ```
-python passwordy.py --password --input_prompt
+python passwordy.py --password --input-prompt
 ```
 
 Generate 4 HEX keys with a length of 20 Byte (= 40 symbols = 160 bit):
 ```
-python passwordy.py --hex_key -n 4 -l 20
+python passwordy.py --hex-key -n 4 -l 20
 OSPFv3 SHA1 authentication, SHA1:
 HEX key 20 Byte, 40 symbols, 160 bit: ebbec2eedb6c3xxxxxxxxxxxxc525cf1c94173c5
 HEX key 20 Byte, 40 symbols, 160 bit: 6f3b84503a061xxxxxxxxxxxx62feed92c444a80
@@ -212,7 +212,7 @@ HEX key 20 Byte, 40 symbols, 160 bit: 63ad56f2b0686xxxxxxxxxxxxe00d68ab3a919f3
 
 ...as JSON output:
 ```
-python passwordy.py --hex_key -n 4 -l 20 --json
+python passwordy.py --hex-key -n 4 -l 20 --json
 ```
 
 Generate 16 (default value) passwords with a length of 24 characters and provide all hashes:
@@ -225,14 +225,14 @@ Generate 1 password with a length of 24 characters and provide all hashes:
 python passwordy.py --password -l 24 -n 1
 ```
 
-Generate 1 password with a length of 24 characters with special characters from `--password_special_characters1` and `--password_special_characters2` and provide all hashes. Check `--help` if you want to know which characters are used:
+Generate 1 password with a length of 24 characters with special characters from `--password-special-characters1` and `--password-special-characters2` and provide all hashes. Check `--help` if you want to know which characters are used:
 ```
-python passwordy.py --password -l 24 -n 1 --password_special_characters1 --password_special_characters2
+python passwordy.py --password -l 24 -n 1 --password-special-characters1 --password-special-characters2
 ```
 
-Generate 1 password with a default length of 16 characters with lower and upper ASCII characters, digits and characters from `--password_additional_characters` and provide all hashes:
+Generate 1 password with a default length of 16 characters with lower and upper ASCII characters, digits and characters from `--password-additional-characters` and provide all hashes:
 ```
-python passwordy.py --password --password_additional_characters ".-" -n 1
+python passwordy.py --password --password-additional-characters ".-" -n 1
 ```
 
 Generate 1 password with a default length of 16 characters with lowerASCII characters and digits and provide all hashes:
