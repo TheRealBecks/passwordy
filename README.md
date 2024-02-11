@@ -92,12 +92,12 @@ key_apr1_salted (e.g. Apache HTTP Server htaccess): $apr1$K9K5s3N7$T3IJ/.KTAxxxx
 
 By default lower and upper ASCII characters and digits are used for password generation and leading digits are avoided so you can sefely use them for protocls like **BGP, OSPF and IS-IS**. If you need more secure passwords run it as follows:
 ```
-python passwordy.py --password-special-characters1 --password-special-characters2
+python passwordy.py -s
 ```
 
 Check `--help` for further information about the characters used for the password generation.
 
-If a password already exists, but the password hashes are needed use `--input-prompt`. `--password` is optional and will be set to `True` is any case:
+If a password already exists, but the password hashes are needed use `--input-prompt`. `--password` is optional and will be set to `True` in any case:
 ```
 python passwordy.py --password --input-prompt
 ```
