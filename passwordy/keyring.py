@@ -1,4 +1,5 @@
 """KeyRing to handle several Keys."""
+
 import json
 from typing import ClassVar
 

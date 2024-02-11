@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 
 [dev-packages]
-black = "*"
 icecream = "*"
 python-language-server = "*"
 ruff = "*"
