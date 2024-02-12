@@ -12,6 +12,7 @@ import string
 import subprocess
 from abc import ABC, abstractmethod
 from functools import reduce
+from typing import TYPE_CHECKING, TypedDict
 
 from constants import (
     PASSWORD_FORBIDDEN_CHARACTERS,
@@ -21,6 +22,9 @@ from constants import (
     SALT_ADDITIONAL_CHARACTERS,
     SALT_LENGTH,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 
 class Key(ABC):
@@ -39,7 +43,7 @@ class Key(ABC):
         """Return Key as str."""
 
     @abstractmethod
-    def verbose(self: "Key") -> None:
+    def verbose(self: "Key") -> str:
         """Return Key as str with verbose information."""
 
 
@@ -83,9 +87,9 @@ class PasswordKey(Key):
         special_characters1: bool = False,
         special_characters2: bool = False,
         additional_characters: str = "",
-    ) -> dict:
+    ) -> tuple[dict[str, bool], str]:
         """Define the password strength to be used for the password generation."""
-        password_strength: dict = {}
+        password_strength: dict[str, bool] = {}
         password_strength["lower_ascii"] = lower_ascii
         password_strength["upper_ascii"] = upper_ascii
         password_strength["digits"] = digits
@@ -107,24 +111,24 @@ class PasswordKey(Key):
         if additional_characters:
             selected_symbols += additional_characters
         # TODO @TheRealBecks: Check if selected_symbols are empty and raise an exception
-        password_strength["selected_symbols"] = selected_symbols
 
-        return password_strength
+        return password_strength, selected_symbols
 
-    def _generate_password(  # noqa: C901
+    def _generate_password(  # noqa: C901, PLR0913
         self: "PasswordKey",
         *,
         key_size_length: int,
-        password_strength: dict,
+        password_strength: dict[str, bool],
+        password_selected_symbols: str,
         check_password_strength: bool = True,
         check_starting_with_digit: bool = True,
     ) -> str:
         """Generate a good password with optionally at least 1 symbol out of each defined symbol group."""
         # Check if selected_symbols are only digits and then disable check_starting_with_digit
-        if check_starting_with_digit and password_strength["selected_symbols"].isdigit():
+        if check_starting_with_digit and password_selected_symbols.isdigit():
             check_starting_with_digit = False
         # Check if password_strength["selected_symbols"] provides symbols for the password generation
-        if password_strength["selected_symbols"] == "":
+        if password_selected_symbols == "":
             msg: str = (
                 "No symbols for password generation provided. Use symbols provided with "
                 "--password-lower-ascii, "
@@ -138,7 +142,10 @@ class PasswordKey(Key):
 
         # Generate password
         while True:
-            key: str = "".join(secrets.choice(password_strength["selected_symbols"]) for _ in range(key_size_length))
+            key: str = "".join(
+                secrets.choice(password_selected_symbols)
+                for _ in range(key_size_length)
+            )
             if (
                 check_password_strength
                 and password_strength["lower_ascii"]
@@ -151,7 +158,11 @@ class PasswordKey(Key):
                 and not any(symbol.isupper() for symbol in key)
             ):
                 continue
-            if check_password_strength and password_strength["digits"] and not any(symbol.isdigit() for symbol in key):
+            if (
+                check_password_strength
+                and password_strength["digits"]
+                and not any(symbol.isdigit() for symbol in key)
+            ):
                 continue
             if (
                 check_password_strength
@@ -179,18 +190,38 @@ class PasswordKey(Key):
 
     def _generate_unsalted_hashes(self: "PasswordKey") -> None:
         """Provide all kind of unsalted hashes for the password."""
-        self.key_md5 = hashlib.md5(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()  # noqa: S324
-        self.key_sha1 = hashlib.sha1(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()  # noqa: S324
-        self.key_sha224 = hashlib.sha224(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha256 = hashlib.sha256(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha384 = hashlib.sha384(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha512 = hashlib.sha512(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha3_224 = hashlib.sha3_224(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha3_256 = hashlib.sha3_256(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha3_384 = hashlib.sha3_384(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
-        self.key_sha3_512 = hashlib.sha3_512(self.key_plaintext.encode(encoding="UTF-8")).hexdigest()
+        self.key_md5 = hashlib.md5(  # noqa: S324
+            self.key_plaintext.encode(encoding="UTF-8")
+        ).hexdigest()
+        self.key_sha1 = hashlib.sha1(  # noqa: S324
+            self.key_plaintext.encode(encoding="UTF-8")
+        ).hexdigest()
+        self.key_sha224 = hashlib.sha224(
+            self.key_plaintext.encode(encoding="UTF-8")
+        ).hexdigest()
+        self.key_sha256 = hashlib.sha256(
+            self.key_plaintext.encode(encoding="UTF-8")
+        ).hexdigest()
+        self.key_sha384 = hashlib.sha384(
+            self.key_plaintext.encode(encoding="UTF-8")
+        ).hexdigest()
+        self.key_sha512 = hashlib.sha512(
+            self.key_plaintext.encode(encoding="UTF-8")
+        ).hexdigest()
+        self.key_sha3_224 = hashlib.sha3_224(
+            self.key_plaintext.encode(encoding="UTF-8")
+        ).hexdigest()
+        self.key_sha3_256 = hashlib.sha3_256(
+            self.key_plaintext.encode(encoding="UTF-8")
+        ).hexdigest()
+        self.key_sha3_384 = hashlib.sha3_384(
+            self.key_plaintext.encode(encoding="UTF-8")
+        ).hexdigest()
+        self.key_sha3_512 = hashlib.sha3_512(
+            self.key_plaintext.encode(encoding="UTF-8")
+        ).hexdigest()
 
-    def _run_openssl(self: "PasswordKey", salt: str, openssl_type: str) -> subprocess.CompletedProcess:
+    def _run_openssl(self: "PasswordKey", salt: str, openssl_type: str) -> str:
         """Run openssl to generate service keys."""
         try:
             openssl_result = subprocess.run(
@@ -207,7 +238,9 @@ class PasswordKey(Key):
                 check=True,
                 text=True,
             )
-            return openssl_result.stdout.strip() if openssl_result.returncode == 0 else ""
+            return (
+                openssl_result.stdout.strip() if openssl_result.returncode == 0 else ""
+            )
         # TODO @TheRealBecks: Check if empty string as return is a good idea
         except FileNotFoundError:
             return ""
@@ -216,7 +249,13 @@ class PasswordKey(Key):
 
     def _generate_salted_hash(self: "PasswordKey", hash_type: str) -> str:
         """Generate a salted hash."""
-        hash_types: dict = {
+
+        class OpenSslAlgorithmType(TypedDict):
+            openssl_type: str
+            salt_length: int
+            salt_additional_characters: str
+
+        hash_types: Mapping[str, OpenSslAlgorithmType] = {
             "apr1": {
                 "openssl_type": "apr1",
                 "salt_length": 8,
@@ -244,7 +283,7 @@ class PasswordKey(Key):
             },
         }
 
-        salt_strength = self._password_strength(
+        salt_strength, salt_selected_symbols = self._password_strength(
             lower_ascii=True,
             upper_ascii=True,
             digits=True,
@@ -255,15 +294,20 @@ class PasswordKey(Key):
         salt = self._generate_password(
             key_size_length=hash_types[hash_type]["salt_length"],
             password_strength=salt_strength,
+            password_selected_symbols=salt_selected_symbols,
             check_password_strength=False,
             check_starting_with_digit=False,
         )
-        return self._run_openssl(salt=salt, openssl_type=hash_types[hash_type]["openssl_type"])
+        return self._run_openssl(
+            salt=salt, openssl_type=hash_types[hash_type]["openssl_type"]
+        )
 
     def _generate_salted_hashes(self: "PasswordKey") -> None:
         """Provide all kind of salted hashes for the password."""
         self.key_md5_salted = self._generate_salted_hash(hash_type="md5")
-        self.key_md5_salted_cisco_ios = self._generate_salted_hash(hash_type="md5_cisco_ios")
+        self.key_md5_salted_cisco_ios = self._generate_salted_hash(
+            hash_type="md5_cisco_ios"
+        )
         self.key_sha256_salted = self._generate_salted_hash(hash_type="sha256")
         self.key_sha512_salted = self._generate_salted_hash(hash_type="sha512")
         self.key_apr1_salted = self._generate_salted_hash(hash_type="apr1")
@@ -288,12 +332,16 @@ class PasswordKey(Key):
 
         # Remove ' and " from additional_characters as these ones are not allowed
         if "'" in password_additional_characters:
-            password_additional_characters = password_additional_characters.replace("'", "")
+            password_additional_characters = password_additional_characters.replace(
+                "'", ""
+            )
         if '"' in password_additional_characters:
-            password_additional_characters = password_additional_characters.replace('"', "")
+            password_additional_characters = password_additional_characters.replace(
+                '"', ""
+            )
 
         # Get all symbols for password generation
-        password_strength = self._password_strength(
+        password_strength, password_selected_symbols = self._password_strength(
             lower_ascii=password_lower_ascii,
             upper_ascii=password_upper_ascii,
             digits=password_digits,
@@ -314,7 +362,10 @@ class PasswordKey(Key):
             )
             raise ValueError(msg)
         # Check for not allowed characters in --password-additional-characters
-        if regex.search(password_additional_characters) is not None and not allow_all_characters:
+        if (
+            regex.search(password_additional_characters) is not None
+            and not allow_all_characters
+        ):
             msg: str = (
                 "--password-additional-characters contains forbidden characters: "
                 f"{PASSWORD_FORBIDDEN_CHARACTERS} (whitespaces are also forbidden)\n"
@@ -328,7 +379,9 @@ class PasswordKey(Key):
         # Generate a password if no password_plaintext is provided
         else:
             self.key_plaintext: str = self._generate_password(
-                key_size_length=self.key_size_length, password_strength=password_strength
+                key_size_length=self.key_size_length,
+                password_strength=password_strength,
+                password_selected_symbols=password_selected_symbols,
             )
 
         # Generate hashes out of self.key_plaintext

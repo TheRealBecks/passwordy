@@ -3,7 +3,11 @@
 import argparse
 from getpass import getpass
 
-from constants import PASSWORD_FORBIDDEN_CHARACTERS, PASSWORD_SPECIAL_CHARACTERS1, PASSWORD_SPECIAL_CHARACTERS2
+from constants import (
+    PASSWORD_FORBIDDEN_CHARACTERS,
+    PASSWORD_SPECIAL_CHARACTERS1,
+    PASSWORD_SPECIAL_CHARACTERS2,
+)
 
 
 def get_password() -> str:
@@ -11,7 +15,7 @@ def get_password() -> str:
     return getpass()
 
 
-def parse_arguments() -> argparse.ArgumentParser:
+def parse_arguments() -> argparse.Namespace:
     """Parse arguments."""
     args = argparse.ArgumentParser(description="Secure password and HEX key generator.")
     args.add_argument(
