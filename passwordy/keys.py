@@ -12,7 +12,7 @@ import string
 import subprocess
 from abc import ABC, abstractmethod
 from functools import reduce
-from typing import TYPE_CHECKING, TypedDict
+from typing import TypedDict
 
 from constants import (
     PASSWORD_FORBIDDEN_CHARACTERS,
@@ -22,9 +22,6 @@ from constants import (
     SALT_ADDITIONAL_CHARACTERS,
     SALT_LENGTH,
 )
-
-if TYPE_CHECKING:
-    from collections.abc import Mapping
 
 
 class Key(ABC):
@@ -255,7 +252,7 @@ class PasswordKey(Key):
             salt_length: int
             salt_additional_characters: str
 
-        hash_types: Mapping[str, OpenSslAlgorithmType] = {
+        hash_types: dict[str, OpenSslAlgorithmType] = {
             "apr1": {
                 "openssl_type": "apr1",
                 "salt_length": 8,
