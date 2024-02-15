@@ -49,10 +49,10 @@ class HexKey(Key):
 
     def __init__(self: "HexKey", length: int) -> None:
         """Initialize HexKey."""
-        self.hex_key_size_byte: int = length
-        self.key_size_symbols: int = self.hex_key_size_byte * 2
-        self.key_size_bit: int = self.hex_key_size_byte * 8
-        self.key_plaintext: str = secrets.token_hex(self.hex_key_size_byte)
+        self.key_size_byte: int = length
+        self.key_size_symbols: int = self.key_size_byte * 2
+        self.key_size_bit: int = self.key_size_byte * 8
+        self.key_plaintext: str = secrets.token_hex(self.key_size_byte)
 
     def __str__(self: "HexKey") -> str:
         """Return HexKey as str."""
@@ -65,7 +65,7 @@ class HexKey(Key):
     def verbose(self: "HexKey") -> str:
         """Return HexKey as str with verbose information."""
         return (
-            f"HEX key {self.hex_key_size_byte} Byte,"
+            f"HEX key {self.key_size_byte} Byte,"
             f" {self.key_size_symbols} symbols,"
             f" {self.key_size_bit} bit:"
             f" {self.key_plaintext}"

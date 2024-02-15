@@ -161,7 +161,7 @@ Pretty printed with `jq` the output looks like this (shortened):
 {
   "hex_key_4": [
     {
-      "hex_key_size_byte": 4,
+      "key_size_byte": 4,
       "key_size_symbols": 8,
       "key_size_bit": 32,
       "key_plaintext": "5dxxxxb0"
