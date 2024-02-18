@@ -248,6 +248,8 @@ class PasswordKey(Key):
         """Generate a salted hash."""
 
         class OpenSslAlgorithmType(TypedDict):
+            """Type definition for OpenSSL Algorithms."""
+
             openssl_type: str
             salt_length: int
             salt_additional_characters: str
